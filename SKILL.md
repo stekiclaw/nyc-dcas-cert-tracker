@@ -1,59 +1,50 @@
 ---
 name: nyc-dcas-cert-tracker
-description: Query and monitor official NYC DCAS active lists and certifications by candidate name, exam and title. Use for smallest current Cert Seq No across agencies including all ties, candidate position at a named agency, past-month certification batches, one-year agency position history, and meaningful certification or list change alerts.
+description: Prompt-only workflow for official NYC DCAS certification and active-list research, personal Cert Seq No comparisons, and cloud-agent scheduled change monitoring. No Python, database or local service required.
 ---
 
 # NYC DCAS Cert Tracker
 
-## Ask which functions are needed
+## Contract and execution modes
+This is a **prompt-only, host-operated Skill**. The web/agent host supplies web browsing, reasoning, memory or previous runs when supported, scheduling and notifications. Never assume a background service, local script, permanent storage, or that scheduling automatically invokes this file.
 
-Respond in the user's language. On interactive invocation, proactively offer these functions and allow multiple choices:
-1. Find agencies with the smallest current personal Cert Seq No, including every tied agency and certificate.
-2. Track personal certification positions at specified agencies.
-3. List all agencies and certificate batches containing the candidate in the past calendar month, with each Cert Seq No.
-4. Analyze one year of certification positions at a specified agency.
-5. Monitor meaningful certification, coverage, personal sequence, list-status and expiry changes, notifying only on material changes.
+- **Interactive:** Offer functions (multiple may be selected): (1) lowest current personal Cert Seq No among **all** agencies and all ties; (2) named-agency batches and personal sequences; (3) all personal batches in the past calendar month; (4) one-year agency history; (5) material-change monitoring.
+- **One scheduled run:** Use saved parameters from the task. Execute the selected functions now, compare against the latest *successfully verified* previous observation if it is accessible, and return only meaningful changes when configured to alert-only. Do not ask setup questions inside a background run.
+- **Task setup:** Only upon a user's scheduling request, help create separate named recurring tasks (per exam/title and selected agencies/functions). Use the host's supported scheduling action. If unavailable, provide a self-contained task prompt from [task-templates.md](references/task-templates.md) for manual setup. Reuse an existing equivalent task when able; avoid duplicates. Scheduling must not depend on the agent possessing this file later. Do not say a task was scheduled unless the host confirms it.
 
-If the user already chose functions, execute them and briefly offer the remaining functions without blocking. In scheduled/noninteractive runs use saved choices and never ask questions.
+Respond in the user's language. Keep personal names/list numbers out of the public repository.
 
-Collect missing First Name, Last Name, MI if present, exam number, title/title code and target agencies for agency-specific work. Strongly recommend exact List No to disambiguate names. Do not request SSN, DOB, address or employee ID. Resolve an unknown title code from official records; do not hard-code personal inputs. For Computer Associate (Operations), scope exam 4034/04034 AND title code 13621. Historical exams can reuse a number for unrelated titles.
+## Inputs and identity
+For personal conclusions, obtain First Name, Last Name, optional MI, exam number, title or title code, and preferably exact List No; agency selection only for agency-specific work. Never ask for SSN, DOB, home address or employee ID. Accept supplied values in task private instructions or supported private host state. In background runs, missing or conflicting essential identity means report configuration/identity uncertainty rather than guessing.
 
-Resolve exact normalized name, MI and List No in official Active records. If multiple identities match, present minimal distinguishing values and ask for selection before personal conclusions. If Active has no match, inspect certification records separately; do not declare removal or appointment. Normalize case and surrounding whitespace, never silently fuzzy-match or transliterate.
+Use exact normalized official name, MI and List No. For ambiguous identities do not merge results: require user selection at next interaction. Normalize case/whitespace, not fuzzy matches. Scope *both* exam and title code (e.g. CA Operations 4034/04034 with 13621); check reused exam numbers.
 
-## Query official sources
+## Official-source research and computation
+Read [data-and-reporting.md](references/data-and-reporting.md). Use NYC DCAS / DCAS-owned Open Data as facts:
+- Certifications https://data.cityofnewyork.us/d/a9md-ynri (API `a9md-ynri`)
+- Active lists https://data.cityofnewyork.us/d/vx8i-nprf (API `vx8i-nprf`)
+- Relevant official DCAS notices for independently verified expiry/termination.
 
-Read [references/data-and-reporting.md](references/data-and-reporting.md). Use only DCAS pages/notices and DCAS-owned NYC Open Data for facts. Use the bundled Python standard-library script for deterministic retrieval and calculations:
+When tools allow, inspect official field names, retrieve every matching page (not a default 1,000-row subset), verify count/completeness and dataset update time. Where tool limits prevent full retrieval, explicitly label results partial and never claim a **global** minimum. Record New York as-of date, source timestamps, official links and issuance dates separately. A failed query/schema mismatch is **unknown**, not "no change."
 
-```bash
-python scripts/dcas_cert.py person --exam EXAM --title-code CODE --first FIRST --last LAST --as-of YYYY-MM-DD --output /absolute/path/person.json
-```
+Cert batch key = (exam_no, list_title_code, list_agency_code, cert_issue_no). `sel_cert_description` is a condition within the batch, not an extra batch. A request date can have multiple cert numbers. Preserve exact decimal List No and numeric Cert Seq No. Cert Seq No is *within that cert*, not global ranking, reachability, a hire or permanent appointment. Keep distinct list numbers and published `no_certified` separate.
 
-Add --mi, --list-no and --agency-code only when known. For global minima and monthly reports use all agencies; an agency-filtered query cannot establish the global minimum. Set as-of to the actual date in America/New_York. Optional --input accepts API-format snapshot JSON with active and certifications arrays; report its age and never label it live. Uploaded official CSV exports may be analyzed with equivalent rules after inspecting their headers; filenames do not prove freshness or authenticity.
+Current dated observations: certification issued by as-of, expiration >= as-of (including today); missing expiry = unknown, excluded from confirmed-date minimum. For *global* minimum, fetch all agencies and include all tied cert rows, not merely each agency's best. Use calendar month/year windows ending as-of inclusive; note reissues of older certs separately. For agency history compare first/latest/best/worst *observed* rows, preserve same-day batches and gaps; changes across cert numbers are NOT movements inside a single cert. Never infer hires, list removal, appointment or tie-breaking from sequences, list ranges, `group_no`, `provisional_replacement` or missing certs.
 
-The script returns resolved identities, current tied minima, unknown-expiry records, recent-month records, older certificates reissued in that month, annual histories grouped by agency and all personal rows. candidate_ambiguous prohibits personal conclusions. Preserve data update timestamps and observation date. Query/schema failures are unknown results, never “no changes.”
+## State, baseline, and notification rules
+Use only host-confirmed persisted task instructions / monitoring memory / prior-run results if accessible. Before comparing, confirm identity scope, source, cert key, and baseline date. Prefer a compact per-task checkpoint containing:
+`task_scope; as_of; sources_updated_at; status; personal_rows:[agency,cert_issue_no,seq,list_no,cert_date,reissue_date,expiry,selection]; cert_batches:[agency,cert_issue_no,distinct_list_numbers,published_count,expiry]; last_notified_event_keys`.
+Keep checkpoint private. Do not assume previous runs are accessible or persisted; if absent, this run is a **baseline** and must not invent deltas. No historical backfill from memory unless supported by verifiable dated evidence.
 
-## Interpret positions carefully
+Material, evidence-backed notifications:
+1. New certification/agency including the candidate.
+2. Changed personal sequence or inclusion in the **same** certificate in two verified dated observations.
+3. Changed published coverage, selection criteria, reissue or expiry on a known certificate.
+4. Independently verified official list termination/extension.
 
-Call cert_seq_no the candidate's sequence within that certification, not global rank, hiring priority, reachability or appointment order. Keep list_no separate and preserve decimal values. A batch is a distinct cert_issue_no within exam/title/agency; a request date can contain several certificates. Include special selection criteria and reissue dates.
+Suppress repeat event keys and mere source-wide update timestamps, unchanged rows, calendar expiry passage alone, and first-baseline "change alerts". A missing record alone requires confirmation; flag as *unverified disappearance*, not removed/hired. If data fails, preserve last successful checkpoint and surface a concise monitoring error according to host policy, never "no change." If the host cannot retain state, report only an as-of snapshot and clearly say cross-run alerts are not reliable.
 
-For current, default to issued certificates whose expiry date is on/after the as-of date. Include expiry-today records with a label. This is date-based observation, not administrative validity or eligibility. Exclude missing expiry dates from confirmed-date minima and list them as current status unknown. If there are no unexpired records, say so and offer historical positions as historical.
+On alert: agency, cert number, request/issue/reissue dates, old/new sequence or published values, expiry, source link and observation dates. On no material change, suppress notification if the host supports silent/conditional monitoring; otherwise give the shortest factual no-change result. Avoid large repeated baseline tables in notifications.
 
-Compute the numeric minimum over all qualifying current personal rows. List EVERY matching row and EVERY tied agency, including several tied certificates at one agency. Explain that batch sizes and selection criteria limit cross-agency comparison.
-
-Use cert_date for monthly/yearly history; flag older certificates reissued during the window separately. Include all same-day batches. Show chronological sequences, published counts, changes and gaps. A lower sequence means earlier within that batch only. Never attribute a change to hires or removals without evidence. Compare first/latest and best/worst observed values; do not interpolate missing history. Distinguish between different-batch sequence differences and within-certificate changes observed in two dated snapshots.
-
-Strictly separate certification, actual hire and Permanent Appointment. no_certified, no_vacancies, provisional_replacement, coverage and sequence do not prove hires, reachable status or permanent appointment. Min/max List No does not imply every intervening number is included.
-
-## Monitor and retain state
-
-Create recurring tasks only when explicitly requested; reuse an existing matching task. Query-only use does not authorize scheduling. Use available Automations tools with the user's timezone; do not claim continuous monitoring without them.
-
-```bash
-python scripts/dcas_cert.py monitor --exam EXAM --title-code CODE --as-of YYYY-MM-DD --previous /absolute/path/previous.json --output /absolute/path/current.json
-```
-
-Omit --previous for the first baseline. Save current snapshot and last successful snapshot durably outside the skill. Use stable keys (exam, title, agency, cert_issue_no); selection descriptions are metadata, not separate certificate identifiers. Preserve all distinct descriptions within each batch, as well as complete distinct List No sets, sequences and dates. Add personal row comparisons from person mode when selected; the bundled monitor does not independently identify personal changes or verify list termination. Do not claim these are operational without a host state store and dated observation comparisons. Save selected functions, user inputs, query date, dataset timestamps and notified event keys privately, preserving existing file identity. Never bundle real names, candidate results, credentials or user history in this reusable skill.
-
-Read `material_changes` and `material_change_count` from monitor JSON. Nonmaterial metadata changes and disappeared certificates/list-presence changes are observations for verification, not immediate removal alerts. Alert on new certificates/agencies, material coverage or personal-sequence changes, reissues, expiry changes and independently confirmed list termination/extension. First baseline, source update timestamp alone, or the passage of an expiry date alone is not a new agency action. Do not repeat unchanged events. Verify missing records before claiming termination; failed queries must not overwrite the last successful snapshot.
-
-Include agency, cert number, request/issue dates, old/new coverage or personal sequence, expiry, official links, query date and source update dates. Separate facts from same-score-group implications; group_no is not automatically a tie group. When there is no meaningful change, suppress notification using the runtime skip marker if required. Keep ongoing tracking enabled until the user stops it or its objective ends.
+## Portable setup and evaluation
+Task prompts must be standalone for ChatGPT Scheduled or another browser agent that cannot auto-load Skills. See [task-templates.md](references/task-templates.md); do not rely on "read GitHub SKILL.md" as the only instruction. Use [acceptance-scenarios.md](references/acceptance-scenarios.md) to check agent behavior after changes; these are prompt-based evaluation scenarios, not executable tests.
