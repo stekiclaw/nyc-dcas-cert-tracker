@@ -70,7 +70,7 @@ def fetch(dataset, where, fields):
 
 
 def key(row):
-    return tuple(row.get(f, '') for f in ('exam_no', 'list_title_code', 'list_agency_code', 'cert_issue_no', 'sel_cert_description'))
+    return tuple(str(row.get(f) or '') for f in ('exam_no', 'list_title_code', 'list_agency_code', 'cert_issue_no'))
 
 
 def identity(row):
@@ -154,17 +154,17 @@ def snapshot(active, rows):
         n = number(r.get('list_no'))
         if n is not None:
             g['list_numbers'].add(n)
-        g['sequence_pairs'].add((str(n), str(number(r.get('cert_seq_no')))))
+        g['sequence_pairs'].add((str(n) if n is not None else '', str(number(r.get('cert_seq_no'))) if number(r.get('cert_seq_no')) is not None else ''))
         for f in CERT_FIELDS.split(','):
             if f not in ('list_no', 'cert_seq_no'):
                 g['fields'].setdefault(f, set()).add(r.get(f, ''))
     for g in grouped.values():
-        g['fields'] = {f: sorted(v) for f, v in g['fields'].items()}
+        g['fields'] = {f: sorted(str(x or '') for x in v) for f, v in g['fields'].items()}
         g['list_numbers'] = [str(n) for n in sorted(g['list_numbers'])]
         g['sequence_pairs'] = [list(pair) for pair in sorted(g['sequence_pairs'])]
     observation = {'present': bool(active), 'candidate_row_count': len(active)}
     for f in ('established_date', 'anniversary_date', 'extension_date'):
-        observation[f] = sorted({r.get(f, '') for r in active})
+        observation[f] = sorted({str(r.get(f) or '') for r in active})
     return {'certificates': grouped, 'active_observation': observation}
 
 
@@ -213,16 +213,44 @@ def main():
                 raise ValueError('Previous snapshot scope differs')
             a, b = old['snapshot']['certificates'], result['snapshot']['certificates']
             for k in sorted(set(a) | set(b)):
-                if a.get(k) != b.get(k):
-                    result['changes'].append({'key': json.loads(k), 'old': a.get(k), 'new': b.get(k)})
-            if old['snapshot']['active_observation'] != result['snapshot']['active_observation']:
-                result['changes'].append({'active_observation_old': old['snapshot']['active_observation'], 'active_observation_new': result['snapshot']['active_observation']})
+                before, after = a.get(k), b.get(k)
+                if before == after:
+                    continue
+                category = 'new_certificate' if before is None else 'certificate_missing_unverified' if after is None else None
+                if category is None:
+                    old_fields, new_fields = before['fields'], after['fields']
+                    categories = []
+                    for field, event in (
+                        ('reissue_date', 'reissue_changed'),
+                        ('cert_expiration_date', 'expiry_changed'),
+                        ('no_certified', 'coverage_changed'),
+                        ('sel_cert_description', 'selection_criteria_changed')):
+                        if old_fields.get(field) != new_fields.get(field):
+                            categories.append(event)
+                    if before['list_numbers'] != after['list_numbers'] or before['sequence_pairs'] != after['sequence_pairs']:
+                        categories.append('certificate_membership_changed')
+                    category = categories or ['nonmaterial_metadata_changed']
+                result['changes'].append({'key': json.loads(k), 'old': before, 'new': after,
+                                          'event_types': [category] if isinstance(category, str) else category,
+                                          'material': category != ['nonmaterial_metadata_changed']
+                                          and category != 'certificate_missing_unverified'})
+            old_active, new_active = old['snapshot']['active_observation'], result['snapshot']['active_observation']
+            if old_active.get('present') != new_active.get('present'):
+                result['changes'].append({'event_types': ['active_list_presence_unverified'],
+                                          'material': False, 'active_observation_old': old_active,
+                                          'active_observation_new': new_active})
+            elif any(old_active.get(f) != new_active.get(f) for f in ('extension_date', 'anniversary_date')):
+                result['changes'].append({'event_types': ['list_dates_changed_unverified'],
+                                          'material': False, 'active_observation_old': old_active,
+                                          'active_observation_new': new_active})
+        result['material_changes'] = [change for change in result['changes'] if change['material']]
+        result['material_change_count'] = len(result['material_changes'])
     destination = Path(args.output)
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + '.tmp')
     temporary.write_text(json.dumps(result, ensure_ascii=False, indent=2))
     temporary.replace(destination)
-    print(json.dumps({'status': result.get('status', 'ok'), 'output': str(destination), 'changes': len(result.get('changes', []))}))
+    print(json.dumps({'status': result.get('status', 'ok'), 'output': str(destination), 'changes': len(result.get('changes', [])), 'material_changes': result.get('material_change_count', 0)}))
 
 
 if __name__ == '__main__':
