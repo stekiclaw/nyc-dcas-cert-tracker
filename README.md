@@ -180,3 +180,14 @@ Use the official sources below. The script checks pagination completeness and wh
 
 - [Civil Service List Certification](https://data.cityofnewyork.us/City-Government/Civil-Service-List-Certification/a9md-ynri)
 - [Civil Service List (Active)](https://data.cityofnewyork.us/City-Government/Civil-Service-List-Active-/vx8i-nprf)
+
+
+## 修复说明 / Monitoring reliability updates
+
+- Cert 快照按考试、Title Code、Agency Code、Cert Issue No 分组；不同 `sel_cert_description` 在同一 Cert 下保留为元数据，不再拆分成伪批次。
+- 对空值标准化，避免字段同时含有 `null` 和字符串时排序失败。
+- `monitor` 输出 `changes`（全部差异）、`material_changes`（有实质意义的差异）及 `material_change_count`；疑似消失的 Cert/名单状态须核验，不直接通知为已终止。
+- 首次基线不产生变化告警；个人逐次序号变化与调度仍由宿主 Agent 进行保存和比较。
+- 运行 `python -m unittest discover -s tests -v`；GitHub Actions 在 Python 3.11/3.13 执行自动化测试。
+
+**English:** Snapshot keys now follow exam/title/agency/certificate number, descriptions stay as metadata, mixed null/string fields are normalized, and monitoring distinguishes material events from unverified disappearance or nonmaterial metadata. Host orchestration remains necessary for personal longitudinal comparisons, scheduling, and live data validation.
