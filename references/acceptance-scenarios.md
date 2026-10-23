@@ -50,3 +50,9 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | O14 | User edits just frequency for existing accessible task | Update the matching task and retain identity, exam, agency, checks; avoid duplicate |
 | O15 | Malformed/missing task profile during unattended run | Fail as configuration error, no broadened query or follow-up interview |
 | O16 | User selects "changes only" but host lacks persistent baseline | Disclose limitation during setup and offer digest/current-snapshot alternative |
+
+| O17 | First-time personal monitoring setup with no other inputs | Opening question must be "你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？" |
+| O18 | User selects "自己在 OTI 的 Certification" | Interpret as `person_agency_focus`, not agency-wide monitoring; ask person's name, then Exam No without re-asking Agency |
+| O19 | User selects "全部 Certification" | Interpret as `person_all`; do not ask for an agency unless they later request one |
+| O20 | User selects Agency focus without saying which agency | Ask one question to obtain Agency name, then continue personal identity questions |
+| O21 | Agency focus has no independent agency-to-cert linkage | Do not treat promotion-list agency fields as requesting-agency proof or claim reliable agency-only coverage |
