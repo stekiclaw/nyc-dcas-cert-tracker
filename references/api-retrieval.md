@@ -104,3 +104,19 @@ This probes the official SODA2 endpoint using only `$select=exam_no&$limit=1`; i
 A separate optional GitHub Actions workflow `.github/workflows/soda2-connectivity.yml` performs the same diagnostic on a GitHub-hosted Ubuntu runner. **On 2026-10-23** a GitHub Actions run passed with "DNS OK" and "SODA2 OK: HTTP 200, JSON array". This is evidence that the official API could be reached from that GitHub runner, **not** a guarantee that a ChatGPT scheduled-task host has the same networking.
 
 **Repair boundary:** this repository cannot change DNS or outbound firewall policy for ChatGPT-hosted tasks. If the task host lacks network access, it must run the fetch in an allowed executor (e.g. a suitably configured private Ubuntu server or a GitHub Actions workflow with appropriate private handling of candidate filters and checkpoint data). A publicly hosted GitHub workflow should **never put personal monitoring settings or resulting person-specific records into public job logs, workflow artifacts or commits**. Do not silently migrate to public storage. A connectivity-only GitHub Action does **not** itself run personal monitoring.
+
+
+## Python implementation (preferred when a private execution host has HTTPS egress)
+
+```bash
+python3 scripts/fetch_certifications.py \
+  --first-name ALEX --last-name EXAMPLE \
+  --exam 4034 --title-code 13621 --list-no 103.000 \
+  --out /private/path/certifications.json
+
+python3 -m unittest discover -s tests -p test_fetch_certifications.py -v
+```
+
+The example is entirely synthetic. The Python stdlib implementation builds official SODA2 `$where`, `$select`, `$order`, `$limit` and `$offset` requests; validates identities and count consistency; handles 4034/04034 as exam-text variants and List No using `Decimal`; retries transient network failures; and writes a 0600 private JSON only after a complete fetch. It does not require curl, jq, requests or an App Token for public queries. The output contains personal data, and must **never** be stored in a public GitHub repository, Actions logs or artifacts.
+
+A GitHub-hosted Actions smoke test exercises this Python script with a **fictional unmatched name**. It verifies that real filtered SODA2 GETs work over the public network, but does not fetch, store or expose a real candidate's record; doing that in production requires a private execution and data-storage arrangement. The ChatGPT sandbox's DNS/egress policy remains a separate platform restriction.
