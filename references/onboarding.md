@@ -11,11 +11,13 @@ This is the interactive initialization contract for the prompt-only Skill. The a
 
 ## Step-by-step flow / 状态机
 
-### Step 1 — Monitoring target
-- Ask: "你要跟踪自己的 Civil Service Certification，还是某个 Agency/指定 Certificate？"
-- Person scope: ask official English **first and last name together**: "请提供考试登记时使用的英文 First Name 和 Last Name。" Allow an optional MI in the same reply.
-- Agency-specific scope: disambiguate (a) personal certs with agency focus, (b) **promotion-list agency** certifications, or (c) known exact certificate numbers. The certification dataset's `list_agency_code` belongs to **promotion lists** and alone does not establish the agency that requested a particular certificate. Never pretend an agency-name filter proves OTI/DCWP/SBS appointing-agency coverage.
-- Agency-only scope: do **not** demand a personal name. Ask the agency name, and then request exam/title or documented promotion-list code or known certificate IDs as appropriate. If appointing-agency mapping cannot be verified, offer explicit promotion-list/code tracking or exact certificate IDs, or show agency association **unverified**.
+### Step 1 — Choose the scope of **your own** certifications / 选择个人监控范围
+- **Opening question (ask verbatim in Chinese when the user speaks Chinese):** "你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？"
+- The choices mean **(a) all certifications belonging to the user** (save `mode: person_all`) and **(b) that same user's certifications related to a specific Agency** (save `mode: person_agency_focus`). The second choice **does not mean all employees/candidates at that agency**. Never offer agency-wide monitoring as the default alternative.
+- If the user chooses their **entire personal record**, ask next: "请提供你参加考试时登记的英文 First Name 和 Last Name。" Optional MI may be included.
+- If the user chooses **their record under a specified Agency**, and has not yet named it, ask next: "你想关注哪个 Agency？请提供名称或常用缩写（例如 OTI、DCWP、SBS）。" After the agency is known, ask for **their** official English first and last name, followed by Exam No as below. If an agency was already named, skip the agency-name question.
+- An Agency name is a **reporting/attribution preference**, not a verified `$where` filter: `list_agency_code` identifies promotion-list context and **does not** establish the certificate's requesting/hiring agency. Always retrieve the user's matching certificates without that agency-code filter. Show a record as associated with the selected Agency only with independent official evidence; otherwise mark agency association **unverified** and warn that Agency-only coverage/notifications cannot be guaranteed from this dataset alone.
+- **Advanced exception:** If the user explicitly asks to research agency-wide certifications unrelated to their own name, separately clarify promotion-list-code vs verified certificate-ID scope. That is a different workflow and must not override the two personal options above.
 
 ### Step 2 — Exam and identity
 For personal tracking, ask, in order, only missing values:
@@ -84,18 +86,33 @@ preflight_status: verified        # verified | zero_match_user_confirmed | not_v
 
 If the user later says "添加考试、改为每天、修改机构、暂停或删除", retrieve the accessible matching task/profile, change **only** the requested fields after confirmation, and retain the remaining saved filters. If the host cannot access an existing task, ask the user for the privately saved task details; do not fabricate task IDs. Keep different exams/candidates isolated in separately named tasks unless the user explicitly wants them combined.
 
-## Sample guided exchange / 示例（虚构姓名）
+## Sample guided exchanges / 首次提问与模拟回答（虚构姓名）
 
-User: "帮我初始化一个每周监控 DCAS Certification 的任务。"
-Agent: "你要监控自己在 Civil Service List Certification 上的记录，还是某个机构的记录？"
-User: "我自己的。"
-Agent: "请提供你参加考试时使用的英文 First Name 和 Last Name。"
+**Opening Agent question, same for both examples:**
+Agent: "你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？"
+
+**Example A — 全部个人 Certification**
+User: "我想跟踪自己全部的 Certification。"
+Agent: "请提供你参加考试时登记的英文 First Name 和 Last Name。"
 User: "Alex Example"
 Agent: "你的 Civil Service Exam No 是多少？"
 User: "4034"
-Agent: "我会先查官方记录确认考试 Title 和身份；如果重名，再问 List No。你想监控全部认证，还是特别关注某个机构？"
-User: "全部认证，也关注 OTI。"
-Agent: "可以监控所有认证，另外把 OTI 设为关注机构；但仅靠这个数据集不能可靠地确认每张证书的申请机构。你最想监控新 Certification、Cert Seq No 变化，还是都要？"
-... Then ask schedule time, notification preference, summarize, and request explicit confirmation.
+Agent: "我会核验考试 Title 和个人记录。你想关注新增 Certification、Cert Seq No 变化，还是两者都要？"
+
+**Example B — 自己在指定 Agency 下的 Certification**
+User: "我只想跟踪自己在 OTI 的 Certification。"
+Agent: "好的，已把 OTI 记录为关注的 Agency。请提供你参加考试时登记的英文 First Name 和 Last Name。"
+User: "Alex Example"
+Agent: "你的 Civil Service Exam No 是多少？"
+User: "4034"
+Agent: "我会查询你的个人认证记录，并核验能否从独立官方资料确认哪些认证与 OTI 有关。如果无法确认，我会明确标记，而不会把所有认证误当作 OTI 认证。你想跟踪新认证、Cert Seq No 变化，还是两者都要？"
+
+**Example C — 仅表示想指定 Agency，尚未给出名称**
+User: "只关注某个 Agency。"
+Agent: "你想关注哪个 Agency？例如 OTI、DCWP 或 SBS。"
+User: "DCWP"
+Agent: "请提供你参加考试时登记的英文 First Name 和 Last Name。"
+
+Then ask about schedule time and notifications, show the configuration summary, and request explicit confirmation. Never repeat an already-known name, exam or agency.
 
 The example is instructional, NOT a real lookup, a real user profile, or a created task.
