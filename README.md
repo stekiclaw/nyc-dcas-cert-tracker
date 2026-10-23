@@ -80,3 +80,16 @@ python3 -m unittest discover -s tests -v  # Optional offline tests
 ```
 
 **Agency attribution / 机构归属：** Certification `list_agency_code` is a promotion-list attribute, not sufficient proof of the requesting agency. For OTI/DCWP/SBS or other appointing-agency claims, require a separately verified official link; otherwise label **unverified**. The sample name above is fictional, and no live API response is implied by offline tests.
+
+
+## API 网络故障诊断 / Network failure diagnostics
+
+**中文：** 遇到 `curl: (6) Could not resolve host: data.cityofnewyork.us`，应先检测当前运行环境的 DNS 与 HTTPS 出站连接，而不是改 SoQL 语法、把 SODA2 换成 SODA3 或申请 Token。运行：
+
+```bash
+python3 scripts/check_api_network.py
+```
+
+该检查只查询一个非个人的官方 JSON 示例，不包含候选人姓名。也可以通过 [GitHub Actions Connectivity Smoke Test](https://github.com/stekiclaw/nyc-dcas-cert-tracker/actions/workflows/soda2-connectivity.yml) 在单独的 GitHub 运行器验证。**2026-10-23 GitHub Actions 测试成功：DNS 正常，SODA2 返回 HTTP 200 JSON 数组。** 这证明某个外部运行器能访问 API，**不等于 ChatGPT 的定时任务也具备网络权限**。本项目无法修改 ChatGPT 平台的网络策略；若任务环境确实封锁外部连接，需要让实际数据获取在具有 HTTPS 出站权限的受信任私有环境运行。不要把个人监控条件、姓名或结果保存到公开 CI 日志/Artifact。
+
+**English:** If `curl (6)` occurs, diagnose DNS and outbound HTTPS **on the actual executor** before changing API URLs or adding tokens. Use `python3 scripts/check_api_network.py` or the public connectivity-only GitHub Actions smoke test. A GitHub-hosted run successfully reached SODA2 on October 23, 2026, but this does not grant egress access to the ChatGPT scheduled task environment. Keep candidate identities and results out of public CI logs and artifacts. See [network triage](references/api-retrieval.md#networkdns-failure-triage-and-proven-alternate-runner).
