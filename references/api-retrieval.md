@@ -6,6 +6,20 @@
 - Active lists: https://data.cityofnewyork.us/resource/vx8i-nprf.json
 - Metadata and schema check: https://data.cityofnewyork.us/api/views/a9md-ynri.json (change ID for active lists)
 
+**Default strategy:** use public **SODA2.1** `GET /resource/a9md-ynri.json` with `$select`, `$where`, `$order`, `$limit` and `$offset`. These clause parameters are the documented straightforward way to reproduce an exported long `$query=SELECT ... SEARCH "NAME"` URL. For a scheduled personal monitor, avoid full-text `SEARCH` as the identity matcher; prefer verified first/last name and exam/title, then List No if needed. SODA3 is **not** the default and may require an App Token. An app token is optional for ordinary public SODA2 reads but can improve rate limits. If the official endpoint cannot be accessed, the correct outcome is `verification incomplete`, not a substitute source or empty candidate list.
+
+Example selecting the requested certification columns (illustrative fictional person):
+
+```bash
+curl --fail-with-body --show-error --silent --get \
+  'https://data.cityofnewyork.us/resource/a9md-ynri.json' \
+  --data-urlencode '$select=exam_no,list_no,first_name,mi,last_name,list_agency_code,list_agency_desc,list_title_desc,cert_seq_no,request_date,salary,cert_issue_no,cert_date,reissue_date,cert_expiration_date,no_certified,no_requested,provisional_replacement,no_vacancies,list_title_code,sel_cert_description' \
+  --data-urlencode "\$where=first_name='ALEX' AND last_name='EXAMPLE' AND exam_no='4034' AND list_title_code='13621'" \
+  --data-urlencode '$order=cert_date DESC, cert_issue_no DESC, cert_seq_no ASC, :id DESC' \
+  --data-urlencode '$limit=1000' \
+  --data-urlencode '$offset=0'
+```
+
 **Never run the Socrata catalog search on every query.** These dataset IDs are known. Catalog discovery is only for a genuinely unknown or changed dataset identifier. Read the data directly using SODA2.1 GET and URL-encoded `$where`, `$order`, `$limit`, and `$offset`. A browser-based agent may issue these direct URLs; a terminal can use the following curl commands.
 
 ```bash
