@@ -21,3 +21,11 @@ Manually run these against a capable browser/agent host using official data or e
 | D15 | Task instructions are copied into a host without Skill loading | Standalone prompt still includes all critical source, grouping, filtering and notification rules |
 
 Use New York date, official links, source update timestamps and fact-vs-inference distinctions for every case.
+
+| D16 | Fixed dataset ID already known | Query known SODA2.1 endpoint directly; no catalog search on ordinary run |
+| D17 | 429/503 followed by success | Bounded retry, then verified JSON; never call it empty on HTTP error |
+| D18 | Pages fetched but count changes from beginning to end | Reject result, preserve last verified snapshot |
+| D19 | Active list query ordered by nonexistent request_date | Choose valid order (:id DESC) instead of importing certification schema |
+| D20 | Open-competitive certification has promotion list agency code 000 | Do not assert a requesting agency without separate official linkage |
+| D21 | HTTP 200 returns JSON object instead of array | Reject malformed API result, not a verified zero |
+| D22 | HTTP 400 unknown SoQL field | Inspect /api/views/{id}.json field names; no unbounded retry |
