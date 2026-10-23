@@ -14,7 +14,7 @@ Example selecting the requested certification columns (illustrative fictional pe
 curl --fail-with-body --show-error --silent --get \
   'https://data.cityofnewyork.us/resource/a9md-ynri.json' \
   --data-urlencode '$select=exam_no,list_no,first_name,mi,last_name,list_agency_code,list_agency_desc,list_title_desc,cert_seq_no,request_date,salary,cert_issue_no,cert_date,reissue_date,cert_expiration_date,no_certified,no_requested,provisional_replacement,no_vacancies,list_title_code,sel_cert_description' \
-  --data-urlencode "\$where=first_name='ALEX' AND last_name='EXAMPLE' AND exam_no='4034' AND list_title_code='13621'" \
+  --data-urlencode "\$where=first_name='ALEX' AND last_name='EXAMPLE' AND exam_no in('04034','4034') AND list_title_code='13621' AND list_no=123.500" \
   --data-urlencode '$order=cert_date DESC, cert_issue_no DESC, cert_seq_no ASC, :id DESC' \
   --data-urlencode '$limit=1000' \
   --data-urlencode '$offset=0'
@@ -47,8 +47,8 @@ The examples are synthetic and contain no real candidate information. Keep ident
 ## Completeness and error policy
 
 1. Filter narrowly by the **valid fields in that dataset** before paging; never try to download the 6M+ rows by default. Do not mistakenly filter by `list_agency_code` when computing a candidate-wide global minimum.
-2. Use a deterministic total order (`request_date DESC, :id DESC` for certifications; `:id DESC` for active lists). Explicitly page with `$limit` and `$offset`; the default page is incomplete.
-3. Verify HTTP 2xx and JSON array response for each page, expected page lengths, aggregate count, and another `count(*)` after retrieval. When the dataset changes during paging, **discard that attempt**. An unchanged count reduces but cannot entirely eliminate pagination race conditions.
+2. Use a deterministic total order (`cert_date DESC, cert_issue_no DESC, cert_seq_no ASC, :id DESC` for certifications; `list_no ASC, :id DESC` for active lists after validating that dataset schema). Default to 1,000 rows per page. Explicitly page with `$limit` and `$offset`; the default page is incomplete.
+3. Verify HTTP 2xx and JSON array response for each page, expected page lengths, aggregate count, and another `count(*)` after retrieval. Read official metadata before and after paging and require unchanged `rowsUpdatedAt`, in addition to equal counts and expected page lengths. When the dataset changes during paging, **discard that attempt**. An unchanged count reduces but cannot entirely eliminate pagination race conditions.
 4. Retry only transient errors (e.g. network timeouts, 408, 429, 500/502/503/504), using bounded retry delays and `Retry-After` when supported. Invalid 400 SoQL should trigger field-metadata validation, not blind retries. Auth errors 401/403 are not empty results.
 5. `200 []` with a separately verified count of zero is a valid empty result. Failed requests, malformed JSON, partial pages, schema mismatch, or missing evidence are **unknown/incomplete**, not 'no change'. Preserve the latest verified snapshot.
 6. Report observation date in America/New_York, dataset `rowsUpdatedAt` separately from row-level `request_date`, `cert_date`, `reissue_date`, and `cert_expiration_date`. Updates to the dataset timestamp alone are not certification events.
@@ -119,4 +119,12 @@ python3 -m unittest discover -s tests -p test_fetch_certifications.py -v
 
 The example is entirely synthetic. The Python stdlib implementation builds official SODA2 `$where`, `$select`, `$order`, `$limit` and `$offset` requests; validates identities and count consistency; handles 4034/04034 as exam-text variants and List No using `Decimal`; retries transient network failures; and writes a 0600 private JSON only after a complete fetch. It does not require curl, jq, requests or an App Token for public queries. The output contains personal data, and must **never** be stored in a public GitHub repository, Actions logs or artifacts.
 
-A GitHub-hosted Actions smoke test exercises this Python script with a **fictional unmatched name**. It verifies that real filtered SODA2 GETs work over the public network, but does not fetch, store or expose a real candidate's record; doing that in production requires a private execution and data-storage arrangement. The ChatGPT sandbox's DNS/egress policy remains a separate platform restriction.
+A GitHub-hosted Actions smoke test exercises this Python script with a **fictional unmatched name**. It verifies that real filtered SODA2 GETs work over the public network, but does not fetch, store or expose a real candidate's record; doing that in production requires a private execution and data-storage arrangement. Network access is specific to the actual executor and tool. Do not describe every ChatGPT container as blocked based on a different execution environment's failure. Direct HTTP success and a web-search fetch failure can coexist.
+
+## Helper boundary and checkpoint compatibility
+
+The optional Python helper currently performs List No filtering locally using Decimal after complete name/exam/title retrieval. Preserve `count_before_list_filter` versus `matched_count`; do not claim its API count included List No. A host that adds List No to a direct SODA2 `$where` must use that exact same clause for both counts. The helper does not itself implement metadata stability checks, Active List queries, global minima, month/year analysis or durable event comparison: complete those host-level steps before declaring a full monitor run successful.
+
+Preserve the original exam text and observed equivalent leading-zero variants in rows. Use numeric Decimal comparison only for numeric fields such as List No and Cert Seq No. When adding newly selected fields, compare common fields to the previous successful snapshot and establish an observation baseline for added fields; do not manufacture a change from previously unobserved values. Keep notified event keys across transport/schema upgrades.
+
+For private monitoring, store full identity filters, selected fields, exact API predicate, paging/count evidence, source update times, observation time, and independently verified agency attribution links. Keep the requesting agency unverified if no official association exists; group by certificate without using promotion-list codes to filter global results.
