@@ -44,7 +44,7 @@ while (($#)); do
 done
 
 [[ "$dataset" =~ ^[a-z0-9]{4}-[a-z0-9]{4}$ ]] || { echo 'Invalid dataset ID' >&2; exit 2; }
-[[ -n "\${where//[[:space:]]/}" ]] || { echo 'Required: --where with a selective SoQL predicate' >&2; exit 2; }
+[[ -n "${where//[[:space:]]/}" ]] || { echo 'Required: --where with a selective SoQL predicate' >&2; exit 2; }
 [[ "$page_size" =~ ^[0-9]+$ ]] && ((10#$page_size >= 1 && 10#$page_size <= 5000)) || { echo 'Invalid page size (1..5000)' >&2; exit 2; }
 [[ "$max_rows" =~ ^[0-9]+$ ]] && ((10#$max_rows >= 1 && 10#$max_rows <= 1000000)) || { echo 'Invalid max rows (1..1000000)' >&2; exit 2; }
 if [[ -z "$order" ]]; then
@@ -53,7 +53,7 @@ if [[ -z "$order" ]]; then
 fi
 for tool in curl jq mktemp; do command -v "$tool" >/dev/null || { echo "Missing dependency: $tool" >&2; exit 2; }; done
 
-url="https://data.cityofnewyork.us/resource/\${dataset}.json"
+url="https://data.cityofnewyork.us/resource/${dataset}.json"
 workdir="$(mktemp -d)"
 out_tmp=""
 cleanup() { rm -rf -- "$workdir"; [[ -z "$out_tmp" ]] || rm -f -- "$out_tmp"; }
@@ -61,20 +61,20 @@ trap cleanup EXIT
 
 curl_args=(--silent --show-error --location --fail-with-body --retry 5 --retry-delay 2 \
   --retry-max-time 180 --connect-timeout 10 --max-time 60 --header 'Accept: application/json' --get)
-if [[ -n "\${SODA_APP_TOKEN:-}" ]]; then
-  curl_args+=(--header "X-App-Token: \${SODA_APP_TOKEN}")
+if [[ -n "${SODA_APP_TOKEN:-}" ]]; then
+  curl_args+=(--header "X-App-Token: ${SODA_APP_TOKEN}")
 fi
 
 fetch_count() {
   local path=$1
-  curl "\${curl_args[@]}" --output "$path" \
+  curl "${curl_args[@]}" --output "$path" \
     --data-urlencode '$select=count(*) as total' \
     --data-urlencode "\$where=$where" "$url"
   jq -er 'if type == "array" and length == 1 then (.[0].total | tonumber)
     else error("Expected one count record") end' "$path"
 }
 
-echo "Fetching count (\${dataset})..." >&2
+echo "Fetching count (${dataset})..." >&2
 expected="$(fetch_count "$workdir/before.json")" || { echo 'Count query failed' >&2; exit 1; }
 [[ "$expected" =~ ^[0-9]+$ ]] || { echo 'Invalid count from Socrata' >&2; exit 1; }
 ((expected <= 10#$max_rows)) || { echo "Refusing $expected rows (max: $max_rows); refine --where" >&2; exit 1; }
@@ -84,7 +84,7 @@ received=0
 while ((received < expected)); do
   offset=$((page * 10#$page_size))
   filename="$(printf '%s/page-%08d.json' "$workdir" "$page")"
-  curl "\${curl_args[@]}" --output "$filename" \
+  curl "${curl_args[@]}" --output "$filename" \
     --data-urlencode "\$where=$where" \
     --data-urlencode "\$order=$order" \
     --data-urlencode "\$limit=$page_size" \
