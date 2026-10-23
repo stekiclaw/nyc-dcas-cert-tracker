@@ -7,13 +7,13 @@
 - API: https://data.cityofnewyork.us/resource/{dataset}.json
 - Metadata: https://data.cityofnewyork.us/api/views/{dataset}.json
 
-rowsUpdatedAt is dataset-wide, not an event date. Inspect schema on field changes. Paginate and check counts; never rely on API default limits. Escape SoQL literals and parse numbers as Decimal.
+For reliable fetching, follow [direct SODA2 retrieval](api-retrieval.md), count-verification, total ordering, and bounded retries. `rowsUpdatedAt` is dataset-wide, not an event date. Inspect schema on field changes. Paginate and check counts; never rely on API default limits. Escape SoQL literals and parse numbers as Decimal.
 
 | Field | Use |
 |---|---|
 | exam_no / list_title_code | Scope exam/title and exclude reused exam numbers |
 | first_name / mi / last_name / list_no | Candidate identity |
-| list_agency_code / list_agency_desc | Agency code and published name |
+| list_agency_code / list_agency_desc | Promotion-list agency attributes, **not verified requesting agency** |
 | cert_issue_no | Certificate identifier; candidate rows are not certificate counts |
 | cert_seq_no | Sequence inside the certificate, not hiring rank |
 | request_date / cert_date | Request date and certification issue date |
@@ -33,7 +33,7 @@ Distinguish published no_certified from distinct candidate rows actually fetched
 
 Use New York's date. Subtract a calendar month/year with day clamping, including leap-day handling. Include both endpoints. Exclude future issue dates. Flag reissues of older certificates separately.
 
-Current minima: Agency | Cert Issue No | Cert Seq No | List No | Cert Date | Reissue Date | Expiry | Published No Certified | Selection conditions. Include all ties and unknown-expiry rows separately.
+Current minima: Requesting agency (independently verified or unknown) | Cert Issue No | Cert Seq No | List No | Cert Date | Reissue Date | Expiry | Published No Certified | Selection conditions. Include all ties and unknown-expiry rows separately.
 
 Agency tracking: Cert Issue No | Request Date | Cert Date | Reissue Date | Personal Seq No | Published count | Expiry | Change since previous observation.
 
@@ -42,3 +42,7 @@ Recent month: Agency | Cert Issue No | Cert Date | Personal Seq No | Expiry. Inc
 Annual history: Agency | Cert Date | Cert Issue No | Reissue Date | Personal Seq No | Published count | Sequence difference from preceding observed batch | Expiry. Follow with first/latest/best/worst observed positions and qualified analysis. Never call a between-batch difference movement inside one certificate. Within-certificate change requires two dated observations.
 
 A zero result means no matching records in this source/window, not never certified. Give official links, data timestamps and coverage limits. Do not speculate about HR actions or tie-breaker rules.
+
+## Appointing agency verification
+
+`list_agency_code` and `list_agency_desc` on this dataset are promotion-list agency fields. For open-competitive certifications, they cannot be used alone to name an agency that requested the certificate. Retain the certification issue number and person-specific values, but mark the appointing agency **unknown** without an independently verified official link. Do not mistake a citywide `000` promotion-list code for an appointing agency.

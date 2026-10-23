@@ -21,3 +21,32 @@ Manually run these against a capable browser/agent host using official data or e
 | D15 | Task instructions are copied into a host without Skill loading | Standalone prompt still includes all critical source, grouping, filtering and notification rules |
 
 Use New York date, official links, source update timestamps and fact-vs-inference distinctions for every case.
+
+| D16 | Fixed dataset ID already known | Query known SODA2.1 endpoint directly; no catalog search on ordinary run |
+| D17 | 429/503 followed by success | Bounded retry, then verified JSON; never call it empty on HTTP error |
+| D18 | Pages fetched but count changes from beginning to end | Reject result, preserve last verified snapshot |
+| D19 | Active list query ordered by nonexistent request_date | Choose valid order (:id DESC) instead of importing certification schema |
+| D20 | Open-competitive certification has promotion list agency code 000 | Do not assert a requesting agency without separate official linkage |
+| D21 | HTTP 200 returns JSON object instead of array | Reject malformed API result, not a verified zero |
+| D22 | HTTP 400 unknown SoQL field | Inspect /api/views/{id}.json field names; no unbounded retry |
+
+## Guided initialization and task re-use scenarios
+
+| ID | Scenario | Required behavior |
+|---|---|---|
+| O01 | First invocation: user says "set up weekly personal DCAS tracking" | Start **one question at a time** with personal name/exam, not a bulk form; do not ask whether they want scheduling again |
+| O02 | User provides name, exam, List No and cadence in one reply | Retain all values and **never re-ask** them; ask only missing fields |
+| O03 | Person knows name and Exam No but not title code | Match official data, confirm verified title; do not require them to memorize title code |
+| O04 | Duplicate official names/exams and unknown List No | Ask targeted MI/List No disambiguation; do not schedule a merged identity |
+| O05 | API confirms no matching row yet | Confirm filters and optionally schedule future-match watch, mark baseline/identity unverified |
+| O06 | User requests OTI-focused personal monitoring | Do not treat promotion-list agency code as proof of OTI requesting cert; preserve citywide records and label unverifiable attribution |
+| O07 | Agency-only/cert-ID monitoring | Do not require personal name; ask verified agency-code mode or certificate IDs |
+| O08 | User says "check once" | Never request cadence or create a scheduled task |
+| O09 | User confirmed config with cadence but not exact time | Ask for day/time or daypart, do not invent a fixed run time |
+| O10 | User has not confirmed final summary | No scheduler action; task not active |
+| O11 | User confirms and scheduling host creates task | Persist **complete private settings in the standalone task prompt**, show host-confirmed status only |
+| O12 | Task runs the following week without previous chat | Use saved name/exam/title/checks/agency/schedule, **zero onboarding prompts** |
+| O13 | Task has saved prompt but no accessible prior snapshot | Do current verification only and disclose inability to claim "new changes" |
+| O14 | User edits just frequency for existing accessible task | Update the matching task and retain identity, exam, agency, checks; avoid duplicate |
+| O15 | Malformed/missing task profile during unattended run | Fail as configuration error, no broadened query or follow-up interview |
+| O16 | User selects "changes only" but host lacks persistent baseline | Disclose limitation during setup and offer digest/current-snapshot alternative |
