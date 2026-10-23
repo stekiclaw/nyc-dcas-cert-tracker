@@ -69,7 +69,7 @@ fetch_count() {
   local path=$1
   curl "${curl_args[@]}" --output "$path" \
     --data-urlencode '$select=count(*) as total' \
-    --data-urlencode "\$where=$where" "$url"
+    --data-urlencode "\$where=$where" "$url" || return 1
   jq -er 'if type == "array" and length == 1 then (.[0].total | tonumber)
     else error("Expected one count record") end' "$path"
 }
