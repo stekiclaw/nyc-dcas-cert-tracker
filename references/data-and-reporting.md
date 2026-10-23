@@ -46,3 +46,11 @@ A zero result means no matching records in this source/window, not never certifi
 ## Appointing agency verification
 
 `list_agency_code` and `list_agency_desc` on this dataset are promotion-list agency fields. For open-competitive certifications, they cannot be used alone to name an agency that requested the certificate. Retain the certification issue number and person-specific values, but mark the appointing agency **unknown** without an independently verified official link. Do not mistake a citywide `000` promotion-list code for an appointing agency.
+
+## Acquisition evidence and comparison compatibility
+
+Preserve exam numbers as strings, including the official leading-zero form; record verified equivalent variants. Preserve List No as exact decimal text and compare with Decimal. Store API count scope separately if the candidate helper filters List No locally. Before accepting a complete observation, verify same-predicate counts, every page, and stable official `rowsUpdatedAt` before/after retrieval.
+
+Record independently verified requesting-agency associations separately from raw `list_agency_code/desc`, with official evidence URLs and dates. Do not turn a promotion-list code or an unverified legacy name into an agency conclusion. Group batch identities by exam/title/cert number; retain selection variants and raw agency fields within the batch.
+
+A newly fetched optional field (for example salary) has no old observed value: establish its baseline rather than report it as an update. Preserve existing event deduplication across transport or field changes. Separate event date, source update timestamp and check timestamp.
