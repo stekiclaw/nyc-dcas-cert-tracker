@@ -66,6 +66,8 @@ Official sources: [DCAS Certifications](https://data.cityofnewyork.us/d/a9md-ynr
 
 ## API 获取成功率优化 / Reliable API retrieval
 
+**默认 API 方案：SODA2.1 GET**。对公有数据不强制要求 Token；定时查询使用 `$where` 精确匹配姓名、Exam No、Title Code（必要时 List No），加上 `$select`、`$order`、`$limit`/`$offset`。不以 `SEARCH "姓名"` 替代身份核验。不把 SODA3 或第三方网页用作自动 fallback；官方接口失败就明确报告未验证。详见 [API 指南](references/api-retrieval.md)。
+
 **中文：** 已知 Certification 数据集 ID 为 `a9md-ynri`，Active Lists 为 `vx8i-nprf`。Skill 现在优先直接访问官方 SODA2.1 JSON API，不再每次先搜索 Socrata Catalog。用 `curl --get --data-urlencode` 正确编码查询参数，按明确条件筛选后稳定分页，检查获取前后的记录数量，并针对超时、429/5xx 有限重试。**查询失败不代表无记录或无变化**。参见 [API 查询指南](references/api-retrieval.md)。
 
 **English:** The Skill now prioritizes the known official SODA2.1 endpoints, with scoped filtering, stable paging, pre/post count checks, bounded retries, and explicit incomplete-data errors. Catalog discovery is only used if a dataset ID is actually unknown. See the [retrieval guide](references/api-retrieval.md).
