@@ -42,7 +42,7 @@ The examples are synthetic and contain no real candidate information. Keep ident
 ### Optional terminal helper
 
 ```bash
-scripts/fetch-soda.sh --dataset a9md-ynri \
+bash scripts/fetch-soda.sh --dataset a9md-ynri \
   --where "exam_no='4034' AND last_name='EXAMPLE'" \
   --page-size 1000 --out certifications.json
 
