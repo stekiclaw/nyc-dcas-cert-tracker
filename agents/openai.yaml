@@ -1,8 +1,7 @@
 interface:
   display_name: NYC DCAS Cert Tracker
   short_description: Track NYC DCAS certification positions and list changes
-  default_prompt: Use $nyc-dcas-cert-tracker to ask which certification position queries
-    I need and check official NYC DCAS records.
+  default_prompt: Use $nyc-dcas-cert-tracker to guide me through first-time NYC DCAS certification monitoring setup one question at a time, privately save verified filters in a scheduled task after my confirmation, or run a one-time lookup if requested.
   icon_small: assets/icon.svg
   icon_large: assets/icon.svg
 policy:
