@@ -60,3 +60,10 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | D23 | User supplies a long SODA2 `$query=SELECT ... SEARCH "FIRST LAST"` link | Default to documented SODA2 `$where` exact identity + exam/title with `$select`/`$order`/paging; full-text search is not identity verification |
 | D24 | Scheduled host can fetch a search-engine catalog page but not official SODA2 JSON | Report official API fetch failed; do not substitute catalog snippets, third-party fields, or fabricated results |
 | D25 | Public SODA2 works without App Token | Proceed without requiring SODA3 token; use bounded backoff if throttled |
+
+| D26 | Web-search fetch fails, direct official curl GET succeeds on the same host | Use verified HTTP result; do not claim the executor is universally blocked |
+| D27 | Count stays equal but official rowsUpdatedAt changes during paging | Discard attempt and preserve successful checkpoint |
+| D28 | New selected salary column was absent from previous snapshot | Baseline added field; preserve prior event keys; no invented salary-change alert |
+| D29 | Official exam is 04034 but private input is 4034; List No is 123.500 | Include verified text variants and compare exact decimal identity; do not merge other titles |
+| D30 | Python helper applies List No locally after API count | Distinguish API-scope count from matched identity count; do not falsely claim server filtering |
+| D31 | Helper finishes but metadata/Active/history checks were not performed | Report only verified helper scope; do not label complete monitoring successful |
