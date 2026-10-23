@@ -34,7 +34,7 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 
 | ID | Scenario | Required behavior |
 |---|---|---|
-| O01 | First invocation: user says "set up weekly personal DCAS tracking" | Start **one question at a time** with personal name/exam, not a bulk form; do not ask whether they want scheduling again |
+| O01 | First invocation: user says "set up weekly personal DCAS tracking" but has not specified all vs agency | Ask the two-option **personal scope** question, then name/exam one question at a time; do not re-ask for cadence or scheduling intent |
 | O02 | User provides name, exam, List No and cadence in one reply | Retain all values and **never re-ask** them; ask only missing fields |
 | O03 | Person knows name and Exam No but not title code | Match official data, confirm verified title; do not require them to memorize title code |
 | O04 | Duplicate official names/exams and unknown List No | Ask targeted MI/List No disambiguation; do not schedule a merged identity |
