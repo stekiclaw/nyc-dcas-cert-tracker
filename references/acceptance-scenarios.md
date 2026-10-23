@@ -56,3 +56,7 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | O19 | User selects "全部 Certification" | Interpret as `person_all`; do not ask for an agency unless they later request one |
 | O20 | User selects Agency focus without saying which agency | Ask one question to obtain Agency name, then continue personal identity questions |
 | O21 | Agency focus has no independent agency-to-cert linkage | Do not treat promotion-list agency fields as requesting-agency proof or claim reliable agency-only coverage |
+
+| D23 | User supplies a long SODA2 `$query=SELECT ... SEARCH "FIRST LAST"` link | Default to documented SODA2 `$where` exact identity + exam/title with `$select`/`$order`/paging; full-text search is not identity verification |
+| D24 | Scheduled host can fetch a search-engine catalog page but not official SODA2 JSON | Report official API fetch failed; do not substitute catalog snippets, third-party fields, or fabricated results |
+| D25 | Public SODA2 works without App Token | Proceed without requiring SODA3 token; use bounded backoff if throttled |
