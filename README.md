@@ -1,113 +1,104 @@
-# NYC DCAS Cert Tracker — Prompt-Based Skill
+# NYC DCAS Cert Tracker
 
 [中文](#中文) · [English](#english)
 
 ## 中文
 
-**定位：** 面向 ChatGPT 网页端 Scheduled Tasks、Meta Muse 等云端 Agent 的轻量 `SKILL.md`。**不依赖 Python、数据库、Docker 或本地后台程序。** 宿主负责联网、定时执行、状态访问与通知；Skill 定义 DCAS 数据核验、人员序号分析和重要变化通知规则。
+面向 ChatGPT Scheduled Tasks、网页端及其他云端 Agent 的 DCAS 认证追踪 Skill。核心工作流由提示词定义，宿主提供联网、计算、私有快照、定时和通知能力；Python 与 curl 脚本是可选执行工具，不是常驻服务。创建计划任务不代表宿主自动加载本仓库，也不保证跨次状态可用。
 
 ### 功能
-- 全部机构当前个人最低 `Cert Seq No`，保留所有并列机构与批次。
-- 指定机构各 Cert 批次个人位置、最近一个日历月的全部批次及一年历史。
-- 对多次可信快照进行比较，发现新增认证、同批次个人位置变化、重发/到期/覆盖变化；过滤无实质意义的变动。
-- 在**用户明确要求**后帮助宿主创建独立计划任务；自动运行只使用已保存的私有查询条件，不反复提问。
 
-### 首次初始化：逐步引导式提问
+- 查询本人当前最低 `Cert Seq No`，保留所有并列证书；机构归属需独立官方核验。
+- 跟踪指定机构相关个人批次、最近一个日历月的全部个人批次及一年可见历史。
+- 对最后一次成功、同范围、带日期的快照进行比较：新增认证，同证书个人序号／包含状态、覆盖、选择条件、重发和到期日变化，以及独立确认的名单终止／延期。
+- 有实质变化才通知；首次基线、数据集刷新或到期日自然经过不算新增事件。失败保持未知，不覆盖成功基线。
 
-首次设置时，Agent **逐轮提问**，不会一次要求填写所有字段，也不会重复询问用户已经提供的信息：
+### 数据如何获取
 
-1. **固定首次提问：**“你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？”两种选项都只跟踪**用户本人**；前者查全部个人认证，后者重点关注本人在指定机构下的认证，**不是**跟踪该 Agency 的所有候选人。
-2. 若选定 Agency 却尚未给出名称，则先询问 Agency；接着两种模式都依次取得英文 First/Last Name、Exam No，优先用官方数据匹配 Title Code，遇到同名/多种考试时才进一步确认 MI、List No。
-3. 根据需求设置 **全部 Certification、指定证书、特定机构重点关注**，选择监控的变化类型。机构名称不一定能直接转为官方 API 筛选条件；不能验证机构归属就明确标记。
-4. 按用户选择询问执行频率与时间、时区、仅变化时通知或定期报告，展示**配置摘要**，用户确认后才创建/更新任务。
+只以 DCAS 官方数据和公告为事实依据。默认直接请求公有 **SODA2.1 HTTP GET**，通常无需 Token：
 
-**创建成功后，完整过滤条件保存在任务私有指令中**，每次计划运行时自动使用，**不再重复问姓名/考试编号**。宿主如果无法保存跨次结果，只能每次出具当前快照，不能保证历史变化提醒。完整规则见 [引导式初始化](references/onboarding.md) 与 [计划任务模板](references/task-templates.md)。
+| 数据 | 固定接口 | 用途 |
+|---|---|---|
+| Certification | https://data.cityofnewyork.us/resource/a9md-ynri.json | 个人认证、序号和批次覆盖 |
+| Active List | https://data.cityofnewyork.us/resource/vx8i-nprf.json | 本人名单条目与建立／周年／延长期限 |
+| 官方字段与更新时间 | `https://data.cityofnewyork.us/api/views/{dataset_id}.json` | 各数据集独立 schema、`rowsUpdatedAt` |
 
-### 网页端计划任务
-1. 交互调用 `SKILL.md`，按 [初始化流程](references/onboarding.md) 逐轮收集并核验必要条件，不要求用户预先知道 Title Code。
-2. 用户确认配置摘要后，用 [独立计划任务模板](references/task-templates.md) 创建任务；姓名、Exam、机构范围、频率、通知策略均保存在任务私有指令中（不提交公开仓库）。
-3. 宿主若能持久访问前次结果，则比较最后一次成功快照；否则只做当前查询，**不能**宣称检测到了历史变化。计划任务运行不代表宿主自动加载 GitHub Skill。
-4. 使用 [测试场景](references/acceptance-scenarios.md)验收首次运行、并列名次、无变化、数据失败和历史比较等行为。
+1. 按姓名、Exam、已核验 Title Code、必要时精确十进制 List No 筛选；保留考号原始字符串，并核验前导零格式（例如 `04034` / `4034`）。姓名相同不足以合并身份。
+2. 使用 URL 编码的 `$where`、`$select`、稳定 `$order`、`$limit=1000`、`$offset` 分页至完整。Active List 使用自己的真实字段和排序。
+3. 分页前后按**完全相同过滤条件**获取 `count(*) as total`；验证每页 JSON 数组、预期行数及总数，并复核前后 `rowsUpdatedAt`。不一致则丢弃该次结果。稳定排序与计数降低并发刷新风险，不能视为数据库事务快照。
+4. 超时、408、429、5xx 进行有界重试；400 检查官方字段；DNS/出站网络错误在实际执行宿主诊断。失败不等于零记录或无变化，不自动替换为 SODA3、Catalog、第三方或搜索摘要。
+5. 比较私有快照，分别记录认证事件日、数据更新时间、查询时间及已通知事件键。新增查询字段本身不是已有字段发生变化。
 
-**注意：** 所谓后台持续追踪是由宿主按计划重复执行，而不是 Skill 自行常驻。具体频率、通知和跨次状态能力以宿主实际支持为准。不要把真实候选人信息加入公开仓库。
+详见 [API 查询指南](references/api-retrieval.md) 和 [数据解释规则](references/data-and-reporting.md)。
 
-官方来源：[Certifications](https://data.cityofnewyork.us/d/a9md-ynri) · [Active Lists](https://data.cityofnewyork.us/d/vx8i-nprf)。
+### 执行工具与网络边界
 
-## English
-
-A **prompt-only Skill** for browser/cloud agents, including ChatGPT Scheduled Tasks and agents such as Meta Muse. It does not require a local Python runtime, database, hosted server or custom crawler. The **host** performs the browsing, scheduling, history access and notifications; the Skill specifies how to query official NYC DCAS data, interpret certification sequences and detect verified material changes.
-
-### Features
-- Global current personal minimum `Cert Seq No` across agencies, with every tied certificate.
-- Agency-specific sequences, past-calendar-month certificates, and one-year observed histories.
-- Careful comparison of verified dated observations for meaningful changes, without conflating certification with hiring or permanent appointment.
-- Standalone [scheduled-task prompt](references/task-templates.md) to paste into hosts that cannot auto-load `SKILL.md`; [evaluation scenarios](references/acceptance-scenarios.md) for acceptance.
-
-### Guided first-run setup
-
-The first question always offers a choice between **tracking all of the user's own Civil Service Certifications** and **tracking that same user's Certifications associated with a specific Agency**. It does **not** offer agency-wide monitoring by default. Ask for the Agency name only if the second option was chosen without specifying it; in either mode, ask one focused question at a time for the user's official first/last name and Exam No, skipping fields already supplied. Resolve title codes from official data where possible, requesting MI or exact List No only for disambiguation. Agency associations need independent verification: promotion-list agency codes are not enough.
-
-The agent then asks what to track, cadence/time, notification mode, previews a configuration summary and creates a task **only after explicit confirmation**. The task's **private self-contained prompt** stores all validated filters for subsequent automated executions; future runs do **not** restart the interview. Reliable historical change detection also requires genuinely persisted snapshots beyond the prompt. See [guided onboarding](references/onboarding.md) and [scheduled task template](references/task-templates.md).
-
-### Setup
-Use the Skill interactively, determine exam/title/candidate criteria and requested functions, then create a separate recurring host task **only with explicit user scheduling intent**. Supply the standalone task prompt with privately entered parameters and cadence. A baseline is not a change alert; a failed fetch is not "no changes." A host unable to retrieve past run evidence cannot guarantee reliable longitudinal change alerts.
-
-Official sources: [DCAS Certifications](https://data.cityofnewyork.us/d/a9md-ynri) · [DCAS Active Lists](https://data.cityofnewyork.us/d/vx8i-nprf).
-
-## Files
-- `SKILL.md`: main interactive/scheduled agent behavior.
-- `references/data-and-reporting.md`: official fields, comparators and report definitions.
-- `references/onboarding.md`: guided interactive initialization and saved-profile contract.
-- `references/task-templates.md`: self-contained cloud scheduling prompt with privately saved filters.
-- `references/acceptance-scenarios.md`: prompt-only acceptance scenarios.
-- `agents/openai.yaml`: compatible skill metadata.
-
-**Portability:** Custom Skill auto-loading is host-dependent. Scheduling is a host capability, not a promise made by this repository.
-
-## API 获取成功率优化 / Reliable API retrieval
-
-**默认 API 方案：SODA2.1 GET**。对公有数据不强制要求 Token；定时查询使用 `$where` 精确匹配姓名、Exam No、Title Code（必要时 List No），加上 `$select`、`$order`、`$limit`/`$offset`。不以 `SEARCH "姓名"` 替代身份核验。不把 SODA3 或第三方网页用作自动 fallback；官方接口失败就明确报告未验证。详见 [API 指南](references/api-retrieval.md)。
-
-**中文：** 已知 Certification 数据集 ID 为 `a9md-ynri`，Active Lists 为 `vx8i-nprf`。Skill 现在优先直接访问官方 SODA2.1 JSON API，不再每次先搜索 Socrata Catalog。用 `curl --get --data-urlencode` 正确编码查询参数，按明确条件筛选后稳定分页，检查获取前后的记录数量，并针对超时、429/5xx 有限重试。**查询失败不代表无记录或无变化**。参见 [API 查询指南](references/api-retrieval.md)。
-
-**English:** The Skill now prioritizes the known official SODA2.1 endpoints, with scoped filtering, stable paging, pre/post count checks, bounded retries, and explicit incomplete-data errors. Catalog discovery is only used if a dataset ID is actually unknown. See the [retrieval guide](references/api-retrieval.md).
-
-Optional local helper (requires bash, curl and jq; no CLI is required to use the prompt-only Skill):
-
-```bash
-bash scripts/fetch-soda.sh --where "exam_no='4034' AND last_name='EXAMPLE'" --out certifications.json
-python3 -m unittest discover -s tests -v  # Optional offline tests
-```
-
-**Agency attribution / 机构归属：** Certification `list_agency_code` is a promotion-list attribute, not sufficient proof of the requesting agency. For OTI/DCWP/SBS or other appointing-agency claims, require a separately verified official link; otherwise label **unverified**. The sample name above is fictional, and no live API response is implied by offline tests.
-
-
-## API 网络故障诊断 / Network failure diagnostics
-
-**中文：** 遇到 `curl: (6) Could not resolve host: data.cityofnewyork.us`，应先检测当前运行环境的 DNS 与 HTTPS 出站连接，而不是改 SoQL 语法、把 SODA2 换成 SODA3 或申请 Token。运行：
-
-```bash
-python3 scripts/check_api_network.py
-```
-
-该检查只查询一个非个人的官方 JSON 示例，不包含候选人姓名。也可以通过 [GitHub Actions Connectivity Smoke Test](https://github.com/stekiclaw/nyc-dcas-cert-tracker/actions/workflows/soda2-connectivity.yml) 在单独的 GitHub 运行器验证。**2026-10-23 GitHub Actions 测试成功：DNS 正常，SODA2 返回 HTTP 200 JSON 数组。** 这证明某个外部运行器能访问 API，**不等于 ChatGPT 的定时任务也具备网络权限**。本项目无法修改 ChatGPT 平台的网络策略；若任务环境确实封锁外部连接，需要让实际数据获取在具有 HTTPS 出站权限的受信任私有环境运行。不要把个人监控条件、姓名或结果保存到公开 CI 日志/Artifact。
-
-**English:** If `curl (6)` occurs, diagnose DNS and outbound HTTPS **on the actual executor** before changing API URLs or adding tokens. Use `python3 scripts/check_api_network.py` or the public connectivity-only GitHub Actions smoke test. A GitHub-hosted run successfully reached SODA2 on October 23, 2026, but this does not grant egress access to the ChatGPT scheduled task environment. Keep candidate identities and results out of public CI logs and artifacts. See [network triage](references/api-retrieval.md#networkdns-failure-triage-and-proven-alternate-runner).
-
-
-## Python SODA2 抓取 / Python candidate retrieval
-
-**默认建议：** 如果实际运行器具备外部 HTTPS 访问权限，可使用纯 Python 标准库的 [个人认证抓取脚本](scripts/fetch_certifications.py)，无需 `curl`、`jq`、第三方 Python 包或 SODA3 App Token。它只使用官方 SODA2 GET，支持姓名/Exam/Title 精确筛选、`04034` / `4034` 号码格式、List No 十进制比较、分页、首尾 `count(*)` 校验、有界重试和原子写入权限为 `0600` 的私有 JSON。
+实际宿主允许 HTTPS 出站时，可用纯 Python 标准库脚本：
 
 ```bash
 python3 scripts/fetch_certifications.py \
   --first-name ALEX --last-name EXAMPLE \
-  --exam 4034 --title-code 13621 --list-no 103.000 \
-  --out /path/to/private/certifications.json
+  --exam 4034 --title-code 13621 --list-no 123.500 \
+  --out /private/certifications.json
 ```
 
-注意：示例身份为**虚构**。输出包含候选人信息，必须保存在私有目录；**不要把真实姓名/数据写入公开的 GitHub Actions YAML、CI 日志、Artifact 或 Git commit**。
+身份为虚构示例。该 helper 获取个人 Certification 并做计数、分页、身份校验及私有原子写入；完整监控仍需宿主按指南补充 metadata 前后复核、Active List、批次覆盖、时间窗口计算及历史对比。可选 List No 当前在 Python helper 中按 Decimal 本地过滤，计数对应过滤前的 API 范围；自行构造 GET 时可按官方字段类型将 List No 加入 `$where`，首尾计数必须使用同一条件。
 
-[GitHub Actions Python SODA2 Smoke Test](https://github.com/stekiclaw/nyc-dcas-cert-tracker/actions/workflows/soda2-connectivity.yml) 在具有互联网出站访问的 GitHub 托管运行器上执行 5 个离线测试、官方域名连接和虚构姓名筛选查询。2026-10-23 已成功完成，但**尚未使用真实私人候选人配置运行认证数据抓取**。ChatGPT 当前 Python 容器仍存在 DNS/HTTPS 出站限制；单纯切换脚本语言不能解除该限制。
+终端可使用 `curl --get --data-urlencode`；另有需要 bash/curl/jq 的 `scripts/fetch-soda.sh`。无终端的宿主可请求正确编码的官方 URL。网页搜索工具无法读取接口，不代表该宿主所有 HTTP 工具都不可用；一个运行器成功或失败，也不能代表另一个运行器。
 
-**English:** On an egress-enabled private host, use `python3 scripts/fetch_certifications.py --first-name ALEX --last-name EXAMPLE --exam 4034 --title-code 13621 --list-no 103.000 --out /private/path.json`. It requires only Python's standard library, uses official SODA2 filtered GET, count and page verification, and writes private JSON atomically with 0600 permissions. Never publish actual candidate settings or output to a public CI workflow, log or artifact. GitHub Actions smoke tests run with a **fictional** name only.
+```bash
+python3 scripts/check_api_network.py
+python3 -m unittest discover -s tests -v
+```
+
+网络探测和离线测试不证明真实个人监控已执行。公开 GitHub Actions 仅用于不含私人候选人信息的连接／合成测试；不得提交真实姓名、监控参数、个人结果、日志或快照。脚本语言或 Token 不能解除平台的网络策略。不要关闭 TLS 校验或硬编码 IP 绕过限制。
+
+### 使用与计划任务
+
+首次设置按 [引导流程](references/onboarding.md) 一次询问一个缺失条件，主动提供全部个人认证、机构重点、最低序号、月度批次、一年历史和变化监控功能。已提供的信息不重复询问。标准 Agency 选项仍是**本人**相关认证，非整个机构所有候选人。
+
+有明确排程意图并确认配置后，使用 [独立任务模板](references/task-templates.md) 将完整条件存入任务**私有指令**。每次自动运行使用这些条件，不重新初始化；只有宿主确认创建成功才称任务已启用。可靠变化提醒还必须有可访问的私有历史快照；没有历史时只能建立新基线，不得假称变化。
+
+**解释限制：** `Cert Seq No` 是该证书内序号。`list_agency_code/desc` 不足以单独证明请求认证的机构；无独立官方关联就标记“招聘／任命机构未核验”，保留原字段。不同证书序号差不是同证书内升降。认证、reachability、provisional replacement、人数及名单号范围不能证明实际聘用、Permanent Appointment 或 tie-breaker 结果。
+
+## English
+
+A prompt-based NYC DCAS certification Skill for ChatGPT Scheduled Tasks, browser agents and other cloud hosts. The host supplies HTTP access, computation, private checkpoints, scheduling and notifications. Python and curl helpers are optional tools, not a background service. Scheduling does not guarantee that the host loads this repository or retains prior results.
+
+### Features
+
+- Current personal minimum `Cert Seq No`, including every tied certificate; independently verify agency attribution.
+- Agency-focused personal batches, all batches issued in the past calendar month and one-year observed histories.
+- Verified changes to certificates, personal sequence/inclusion within the same certificate, coverage, selection, reissue/expiry, and independently confirmed list termination/extension.
+- Material-change alerts with deduplication. A baseline, dataset refresh or calendar expiry passage alone is not a new event. Failed retrieval remains unknown and preserves the last successful checkpoint.
+
+### Retrieval and reliability
+
+Use the fixed official **SODA2.1 GET** endpoints above, normally without a mandatory token. Filter by exact candidate/exam/verified title and, when needed, exact decimal List No. Preserve exam text and check leading-zero variants; never merge identities using names alone.
+
+Use encoded `$where`, `$select`, a deterministic `$order`, `$limit=1000` and `$offset`. Validate every JSON array and page length, initial/final counts under the identical filter, and dataset `rowsUpdatedAt` before/after. Reject inconsistent attempts. Ordering and counts reduce race risk but do not provide transaction-level snapshot isolation. Check Active List separately using its own schema.
+
+Retry transient transport/408/429/5xx failures with limits; inspect official metadata on 400. Record actual DNS/HTTP errors. Do not substitute SODA3, Catalog, search snippets or third-party results. Distinguish row-level event dates, source update times and observation times. A newly selected field is not evidence that its value changed historically.
+
+Use `scripts/fetch_certifications.py` on a private Python host with official-domain HTTPS access, or curl / correctly encoded official URLs where supported. The helper verifies candidate rows, paging and counts and writes private JSON atomically. The host must additionally verify metadata stability, query Active Lists, calculate current/month/year results, and compare certificate coverage and historical checkpoints. Its optional List No filter currently runs locally using Decimal; the API counts apply before that local filter. For a direct GET with List No in `$where`, use that same predicate for both counts.
+
+Network capability is executor-specific. A failed web-search fetch does not establish that direct HTTP is blocked, and an external CI success does not grant access to a scheduled host. Run `scripts/check_api_network.py` on the actual executor. Offline tests and privacy-safe connectivity smoke tests are not proof of a successful personal query. Keep real identities, filled task profiles, snapshots and results out of public commits, CI logs and artifacts. Never disable TLS checks or hard-code an IP to evade network policy.
+
+### Setup and interpretation
+
+Follow [guided onboarding](references/onboarding.md), ask one missing setting at a time and skip already supplied inputs. Offer all personal certificates versus agency-focused **personal** records, not agency-wide research by default. After explicit scheduling intent and confirmed configuration, save a complete [standalone private task prompt](references/task-templates.md). Unattended runs reuse it without questions. A reliable change claim requires an accessible, dated, successful prior checkpoint of the same scope; otherwise establish a baseline.
+
+`list_agency_code/desc` alone is insufficient to identify a requesting agency. Preserve published fields and label the requesting/appointing agency unverified without independent official evidence. Cross-certificate sequence differences are not movement within one certificate. Certification, reachability, provisional-replacement flags, counts and list ranges do not prove hiring, Permanent Appointment or tie-breaking outcomes.
+
+## Files
+
+- [SKILL.md](SKILL.md): interactive and unattended behavior.
+- [API retrieval](references/api-retrieval.md): requests, completeness and network diagnosis.
+- [Data and reporting](references/data-and-reporting.md): official fields, identity, windows and interpretation.
+- [Onboarding](references/onboarding.md): guided setup.
+- [Task templates](references/task-templates.md): standalone private scheduling instructions.
+- [Acceptance scenarios](references/acceptance-scenarios.md): prompt behavior checks.
+- `scripts/`: optional Python, curl and network helpers.
+- `tests/`: offline helper tests; `agents/openai.yaml`: host metadata.
+
+Official datasets: [Certifications](https://data.cityofnewyork.us/d/a9md-ynri) · [Active Lists](https://data.cityofnewyork.us/d/vx8i-nprf).
