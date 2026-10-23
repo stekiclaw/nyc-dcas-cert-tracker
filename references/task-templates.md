@@ -32,7 +32,7 @@ notification_policy: [changes_only | digest]
 preflight_status: [verified | zero_match_user_confirmed | not_verified]
 ~~~
 
-For a **person**, first/last name and Exam No are required; title code and List No are conditional on official evidence and disambiguation. An unverified title must not become a fabricated SoQL filter. For an **agency-only** monitor, no candidate identity is required; require an explicitly supported agency promotion-list filter or known certificate numbers. A city agency's appointing-certifications cannot be comprehensively filtered solely by `list_agency_code` on an open-competitive list. Do not silently change this scope.
+The **standard first-run interview always offers two PERSONAL scopes**: `person_all` (all the user's own certificates) or `person_agency_focus` (the same user's certificates related to a named Agency). Do **not** present agency-wide monitoring as the default second option. Save `agency.focus_name` when the second choice is selected; if an appointing-agency connection is unverified, mark it unverified and never claim reliable agency-only matching. The legacy agency-wide modes are for separately requested advanced research only. For a **person**, first/last name and Exam No are required; title code and List No are conditional on official evidence and disambiguation. An unverified title must not become a fabricated SoQL filter. For an **agency-only** monitor, no candidate identity is required; require an explicitly supported agency promotion-list filter or known certificate numbers. A city agency's appointing-certifications cannot be comprehensively filtered solely by `list_agency_code` on an open-competitive list. Do not silently change this scope.
 
 ### Suggested task name
 
