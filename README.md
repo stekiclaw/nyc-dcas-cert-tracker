@@ -45,3 +45,18 @@ Official sources: [DCAS Certifications](https://data.cityofnewyork.us/d/a9md-ynr
 - `agents/openai.yaml`: compatible skill metadata.
 
 **Portability:** Custom Skill auto-loading is host-dependent. Scheduling is a host capability, not a promise made by this repository.
+
+## API 获取成功率优化 / Reliable API retrieval
+
+**中文：** 已知 Certification 数据集 ID 为 `a9md-ynri`，Active Lists 为 `vx8i-nprf`。Skill 现在优先直接访问官方 SODA2.1 JSON API，不再每次先搜索 Socrata Catalog。用 `curl --get --data-urlencode` 正确编码查询参数，按明确条件筛选后稳定分页，检查获取前后的记录数量，并针对超时、429/5xx 有限重试。**查询失败不代表无记录或无变化**。参见 [API 查询指南](references/api-retrieval.md)。
+
+**English:** The Skill now prioritizes the known official SODA2.1 endpoints, with scoped filtering, stable paging, pre/post count checks, bounded retries, and explicit incomplete-data errors. Catalog discovery is only used if a dataset ID is actually unknown. See the [retrieval guide](references/api-retrieval.md).
+
+Optional local helper (requires bash, curl and jq; no CLI is required to use the prompt-only Skill):
+
+```bash
+bash scripts/fetch-soda.sh --where "exam_no='4034' AND last_name='EXAMPLE'" --out certifications.json
+python3 -m unittest discover -s tests -v  # Optional offline tests
+```
+
+**Agency attribution / 机构归属：** Certification `list_agency_code` is a promotion-list attribute, not sufficient proof of the requesting agency. For OTI/DCWP/SBS or other appointing-agency claims, require a separately verified official link; otherwise label **unverified**. The sample name above is fictional, and no live API response is implied by offline tests.
