@@ -1,10 +1,12 @@
-name: NYC Open Data SODA2 connectivity smoke test
+name: NYC Open Data Python SODA2 smoke test
 
 on:
   workflow_dispatch:
   push:
     paths:
       - "scripts/check_api_network.py"
+      - "scripts/fetch_certifications.py"
+      - "tests/test_fetch_certifications.py"
       - ".github/workflows/soda2-connectivity.yml"
 
 permissions:
@@ -12,10 +14,31 @@ permissions:
 
 jobs:
   probe:
-    name: Public SODA2 connectivity (no personal data)
+    name: Python SODA2 fetch and offline tests (synthetic only)
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Python fetcher unit tests
+        run: python3 -m unittest discover -s tests -p test_fetch_certifications.py -v
       - name: DNS, HTTPS, JSON probe
         run: python3 scripts/check_api_network.py
+      - name: Real SODA2 filtered query with a fictional name (private temporary output)
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          python3 scripts/fetch_certifications.py \
+            --first-name SYNTHETIC-UNKNOWN-PERSON \
+            --last-name SAMPLE-DOES-NOT-EXIST \
+            --exam 4034 \
+            --title-code 13621 \
+            --out "$tmp/private-test.json"
+          python3 - "$tmp/private-test.json" <<'PY'
+          import json, sys
+          data = json.load(open(sys.argv[1]))
+          assert isinstance(data["rows"], list)
+          assert data["matched_count"] == 0, "Synthetic name unexpectedly matched"
+          print("Filtered SODA2 GET, count and JSON parsing passed.")
+          PY
