@@ -78,3 +78,29 @@ NYC's certification dataset defines `list_agency_code` / `list_agency_desc` as *
 SODA3 uses `/api/v3/views/{id}/query.json`, a full SoQL `query` or JSON POST payload, and an application token or authenticated identity. Do not send SODA2 fragment parameters to it or assume identical response shape. SODA2.1 remains a supported direct path.
 
 Official references: [NYC certification data](https://data.cityofnewyork.us/d/a9md-ynri), [Socrata paging](https://dev.socrata.com/docs/paging.html), [App tokens](https://dev.socrata.com/docs/app-tokens), [SODA3 usage](https://support.socrata.com/hc/en-us/articles/43491231777047-Using-the-SODA3-API).
+
+
+## Network/DNS failure triage and proven alternate runner
+
+Before changing SoQL syntax, isolate failures **at the transport layer**:
+
+| Symptom | Meaning | Next step |
+|---|---|---|
+| `curl: (6) Could not resolve host` / Python `gaierror` | DNS failure **before** an HTTP request exists | Test a control hostname (such as `example.com`), then the official domain; inspect runtime DNS/egress policy |
+| All unrelated public hostnames fail and direct public IP HTTPS also fails | Container/sandbox-wide DNS/outbound restriction is likely | Switch the API fetch to a **supported egress-enabled executor**, or request platform network access; API parameters and tokens cannot repair this |
+| DNS succeeds, TCP 443 fails | HTTPS egress/firewall/proxy issue | Configure approved HTTPS egress and proxy on the **actual runner**, never hard-code an IP or disable TLS certificate checks |
+| HTTP 400 | Query or schema problem | Validate SODA2 SoQL fields using official metadata |
+| HTTP 401/403 or 429 | Authorization or throttling | Verify supported authentication, token/rate limits and backoff |
+| HTTP 200 but malformed/short JSON | Invalid/incomplete result | Reject the observation, preserve last verified baseline |
+
+Run this **public, privacy-safe diagnostic** on the host that actually performs the scheduled query:
+
+```bash
+python3 scripts/check_api_network.py
+```
+
+This probes the official SODA2 endpoint using only `$select=exam_no&$limit=1`; it never queries a candidate, outputs their name, or embeds an API token. Exit status `0` means the official JSON API was successfully reached, `2` means DNS resolution failed, and `3` means HTTP/TLS/JSON failed. A control hostname is checked only when the official DNS lookup fails.
+
+A separate optional GitHub Actions workflow `.github/workflows/soda2-connectivity.yml` performs the same diagnostic on a GitHub-hosted Ubuntu runner. **On 2026-10-23** a GitHub Actions run passed with "DNS OK" and "SODA2 OK: HTTP 200, JSON array". This is evidence that the official API could be reached from that GitHub runner, **not** a guarantee that a ChatGPT scheduled-task host has the same networking.
+
+**Repair boundary:** this repository cannot change DNS or outbound firewall policy for ChatGPT-hosted tasks. If the task host lacks network access, it must run the fetch in an allowed executor (e.g. a suitably configured private Ubuntu server or a GitHub Actions workflow with appropriate private handling of candidate filters and checkpoint data). A publicly hosted GitHub workflow should **never put personal monitoring settings or resulting person-specific records into public job logs, workflow artifacts or commits**. Do not silently migrate to public storage. A connectivity-only GitHub Action does **not** itself run personal monitoring.
