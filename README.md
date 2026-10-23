@@ -16,8 +16,8 @@
 
 首次设置时，Agent **逐轮提问**，不会一次要求填写所有字段，也不会重复询问用户已经提供的信息：
 
-1. 先问要追踪 **个人 Certification**，还是 **机构/指定 Cert**。
-2. 个人模式依次取得英文 First/Last Name、Exam No；优先用官方数据匹配 Title Code，遇到同名/多种考试时才进一步确认 MI、List No。
+1. **固定首次提问：**“你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？”两种选项都只跟踪**用户本人**；前者查全部个人认证，后者重点关注本人在指定机构下的认证，**不是**跟踪该 Agency 的所有候选人。
+2. 若选定 Agency 却尚未给出名称，则先询问 Agency；接着两种模式都依次取得英文 First/Last Name、Exam No，优先用官方数据匹配 Title Code，遇到同名/多种考试时才进一步确认 MI、List No。
 3. 根据需求设置 **全部 Certification、指定证书、特定机构重点关注**，选择监控的变化类型。机构名称不一定能直接转为官方 API 筛选条件；不能验证机构归属就明确标记。
 4. 按用户选择询问执行频率与时间、时区、仅变化时通知或定期报告，展示**配置摘要**，用户确认后才创建/更新任务。
 
@@ -45,7 +45,7 @@ A **prompt-only Skill** for browser/cloud agents, including ChatGPT Scheduled Ta
 
 ### Guided first-run setup
 
-On first-time monitoring setup, the agent asks **one focused question at a time**, skips all details already provided, and **collects the user's first/last name and Exam No** (person mode). It resolves title codes from official data where possible and requests MI or exact List No only to disambiguate. An agency-only monitor instead asks agency/scope and supported certificate filters; agency focus must not be confused with promotion-list agency codes.
+The first question always offers a choice between **tracking all of the user's own Civil Service Certifications** and **tracking that same user's Certifications associated with a specific Agency**. It does **not** offer agency-wide monitoring by default. Ask for the Agency name only if the second option was chosen without specifying it; in either mode, ask one focused question at a time for the user's official first/last name and Exam No, skipping fields already supplied. Resolve title codes from official data where possible, requesting MI or exact List No only for disambiguation. Agency associations need independent verification: promotion-list agency codes are not enough.
 
 The agent then asks what to track, cadence/time, notification mode, previews a configuration summary and creates a task **only after explicit confirmation**. The task's **private self-contained prompt** stores all validated filters for subsequent automated executions; future runs do **not** restart the interview. Reliable historical change detection also requires genuinely persisted snapshots beyond the prompt. See [guided onboarding](references/onboarding.md) and [scheduled task template](references/task-templates.md).
 
