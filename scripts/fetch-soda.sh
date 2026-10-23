@@ -8,7 +8,7 @@ Fetch a complete *filtered* NYC Socrata SODA2 dataset as a JSON array.
 Requires: bash, curl, jq. Optional: SODA_APP_TOKEN environment variable.
 
 Usage:
-  scripts/fetch-soda.sh --where "exam_no='4034' AND last_name='EXAMPLE'" \
+  bash scripts/fetch-soda.sh --where "exam_no='4034' AND last_name='EXAMPLE'" \
     [--dataset a9md-ynri] [--out certs.json] [--page-size 1000] [--max-rows 50000]
 
 Use official API field names. Supply a selective SoQL predicate; never run a
