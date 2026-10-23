@@ -93,3 +93,21 @@ python3 scripts/check_api_network.py
 该检查只查询一个非个人的官方 JSON 示例，不包含候选人姓名。也可以通过 [GitHub Actions Connectivity Smoke Test](https://github.com/stekiclaw/nyc-dcas-cert-tracker/actions/workflows/soda2-connectivity.yml) 在单独的 GitHub 运行器验证。**2026-10-23 GitHub Actions 测试成功：DNS 正常，SODA2 返回 HTTP 200 JSON 数组。** 这证明某个外部运行器能访问 API，**不等于 ChatGPT 的定时任务也具备网络权限**。本项目无法修改 ChatGPT 平台的网络策略；若任务环境确实封锁外部连接，需要让实际数据获取在具有 HTTPS 出站权限的受信任私有环境运行。不要把个人监控条件、姓名或结果保存到公开 CI 日志/Artifact。
 
 **English:** If `curl (6)` occurs, diagnose DNS and outbound HTTPS **on the actual executor** before changing API URLs or adding tokens. Use `python3 scripts/check_api_network.py` or the public connectivity-only GitHub Actions smoke test. A GitHub-hosted run successfully reached SODA2 on October 23, 2026, but this does not grant egress access to the ChatGPT scheduled task environment. Keep candidate identities and results out of public CI logs and artifacts. See [network triage](references/api-retrieval.md#networkdns-failure-triage-and-proven-alternate-runner).
+
+
+## Python SODA2 抓取 / Python candidate retrieval
+
+**默认建议：** 如果实际运行器具备外部 HTTPS 访问权限，可使用纯 Python 标准库的 [个人认证抓取脚本](scripts/fetch_certifications.py)，无需 `curl`、`jq`、第三方 Python 包或 SODA3 App Token。它只使用官方 SODA2 GET，支持姓名/Exam/Title 精确筛选、`04034` / `4034` 号码格式、List No 十进制比较、分页、首尾 `count(*)` 校验、有界重试和原子写入权限为 `0600` 的私有 JSON。
+
+```bash
+python3 scripts/fetch_certifications.py \
+  --first-name ALEX --last-name EXAMPLE \
+  --exam 4034 --title-code 13621 --list-no 103.000 \
+  --out /path/to/private/certifications.json
+```
+
+注意：示例身份为**虚构**。输出包含候选人信息，必须保存在私有目录；**不要把真实姓名/数据写入公开的 GitHub Actions YAML、CI 日志、Artifact 或 Git commit**。
+
+[GitHub Actions Python SODA2 Smoke Test](https://github.com/stekiclaw/nyc-dcas-cert-tracker/actions/workflows/soda2-connectivity.yml) 在具有互联网出站访问的 GitHub 托管运行器上执行 5 个离线测试、官方域名连接和虚构姓名筛选查询。2026-10-23 已成功完成，但**尚未使用真实私人候选人配置运行认证数据抓取**。ChatGPT 当前 Python 容器仍存在 DNS/HTTPS 出站限制；单纯切换脚本语言不能解除该限制。
+
+**English:** On an egress-enabled private host, use `python3 scripts/fetch_certifications.py --first-name ALEX --last-name EXAMPLE --exam 4034 --title-code 13621 --list-no 103.000 --out /private/path.json`. It requires only Python's standard library, uses official SODA2 filtered GET, count and page verification, and writes private JSON atomically with 0600 permissions. Never publish actual candidate settings or output to a public CI workflow, log or artifact. GitHub Actions smoke tests run with a **fictional** name only.
