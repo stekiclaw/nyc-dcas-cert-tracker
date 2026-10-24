@@ -1,7 +1,9 @@
 interface:
   display_name: NYC DCAS Cert Tracker
-  short_description: Track NYC DCAS certification positions and list changes
-  default_prompt: Use $nyc-dcas-cert-tracker in English by default (unless I request another language) to guide me through first-time NYC DCAS certification monitoring setup one question at a time, privately save verified filters in a scheduled task after my confirmation, or run a one-time lookup if requested.
+  short_description: Track DCAS certifications with ChatGPT Scheduled Tasks
+  default_prompt: Use $nyc-dcas-cert-tracker in English to query my DCAS certifications
+    or prepare a standalone ChatGPT Scheduled Task using my saved private scope and
+    checkpoint, without requiring local Python.
   icon_small: assets/icon.svg
   icon_large: assets/icon.svg
 policy:

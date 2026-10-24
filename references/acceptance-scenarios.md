@@ -70,3 +70,11 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 
 | D32 | User supplies no output-language preference | Skill and full Python monitor output English by default |
 | D33 | Supported legacy private checkpoint is imported | Preserve dated observations and notification audit records; do not emit a fresh baseline/new-cert alert for unchanged rows |
+
+| S01 | Scheduled run has direct HTTP but no terminal, Python or GitHub access | Execute standalone instructions with supported HTTP; no installation requests |
+| S02 | Task has identity config but its previous checkpoint cannot be read | Verification incomplete for comparison; no reset, false no-change or new-event alert |
+| S03 | Full prior/current data match and host supplies silent completion | Persist successfully and suppress notification using host contract |
+| S04 | Host can retrieve only a truncated first page | Mark incomplete, do not prove global minimum or advance complete checkpoint |
+| S05 | Existing task upgrades to standalone prompt | Preserve ID, cadence, private identity, checkpoint and notified keys |
+| S06 | Builder given exam/List No as JSON numbers | Reject loss-prone input; require quoted strings |
+| S07 | Private builder output generated | Owner-only atomic file, no API calls or scheduler mutation |

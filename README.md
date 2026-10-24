@@ -8,6 +8,12 @@
 
 面向 ChatGPT Scheduled Tasks、网页端及其他云端 Agent 的 DCAS 认证追踪 Skill。核心工作流由提示词定义，宿主提供联网、计算、私有快照、定时和通知能力；Python 与 curl 脚本是可选执行工具，不是常驻服务。创建计划任务不代表宿主自动加载本仓库，也不保证跨次状态可用。
 
+### ChatGPT Scheduled Tasks 默认入口
+
+使用 [独立任务指令](references/scheduled-task-prompt.md)，把已确认的个人配置和私有快照引用填入任务即可；运行不要求本地 Python、clone 仓库或再次加载 GitHub。详见 [Scheduled Tasks 使用指南](references/chatgpt-scheduled.md)。默认英文，保存过的明确语言偏好优先。已有任务应更新原任务并保留历史，不重复建立。联网、私有历史存储和静默通知需以实际宿主能力为准，无法核验时明确报告限制。
+
+Python 用户可用 `scripts/build_scheduled_prompt.py` 从私有配置生成完整任务指令；它只生成指令，不创建任务。下面的完整 Python 监控入口保留为可选执行方式。
+
 ### 功能
 
 - 查询本人当前最低 `Cert Seq No`，保留所有并列证书；机构归属需独立官方核验。
@@ -35,7 +41,7 @@
 
 ### 执行工具与网络边界
 
-实际宿主允许 HTTPS 出站时，优先使用完整的纯 Python 标准库监控入口：
+如选择在具备 Python 和 HTTPS 出站能力的私有宿主运行，可使用完整的标准库监控入口：
 
 ```bash
 python3 scripts/dcas_monitor.py \
@@ -80,6 +86,12 @@ python3 -m unittest discover -s tests -v
 
 A prompt-based NYC DCAS certification Skill for ChatGPT Scheduled Tasks, browser agents and other cloud hosts. The host supplies HTTP access, computation, private checkpoints, scheduling and notifications. Python and curl helpers are optional tools, not a background service. Scheduling does not guarantee that the host loads this repository or retains prior results.
 
+### ChatGPT Scheduled Tasks default entry
+
+Use the [standalone task instructions](references/scheduled-task-prompt.md) with the confirmed private profile and checkpoint reference embedded. Scheduled execution does not require Python, a cloned repository or reloading GitHub. See the [Scheduled Tasks guide](references/chatgpt-scheduled.md). Default to English and preserve explicit saved language preferences. Upgrade an existing task in place and keep its history. Verify actual HTTP, private state and silent-completion capabilities; disclose missing capabilities.
+
+Optional `scripts/build_scheduled_prompt.py` fills the template from a private config; it does not schedule anything. The full Python monitor remains available for capable private hosts.
+
 ### Features
 
 - Current personal minimum `Cert Seq No`, including every tied certificate; independently verify agency attribution.
@@ -95,7 +107,7 @@ Use encoded `$where`, `$select`, a deterministic `$order`, `$limit=1000` and `$o
 
 Retry transient transport/408/429/5xx failures with limits; inspect official metadata on 400. Record actual DNS/HTTP errors. Do not substitute SODA3, Catalog, search snippets or third-party results. Distinguish row-level event dates, source update times and observation times. A newly selected field is not evidence that its value changed historically.
 
-Use `scripts/fetch_certifications.py` on a private Python host with official-domain HTTPS access, or curl / correctly encoded official URLs where supported. The smaller acquisition helper verifies candidate rows, paging and counts and writes private JSON atomically. For full monitoring, prefer `python3 scripts/dcas_monitor.py --config /private/config.json --state /private/state.json --report /private/report.json`. This complete entry point includes metadata stability, Active Lists, minimum/month/year analysis, coverage comparisons, checkpoint migration and report deduplication. It is English-first and silent for an unchanged result or initial baseline; use `--digest` for a full report. See the [full Python guide](references/python-monitor.md) and [fictional config example](references/private-config.example.json). The smaller acquisition helper alone does not perform these monitoring steps. Its optional List No filter currently runs locally using Decimal; the API counts apply before that local filter. For a direct GET with List No in `$where`, use that same predicate for both counts.
+Use `scripts/fetch_certifications.py` on a private Python host with official-domain HTTPS access, or curl / correctly encoded official URLs where supported. The smaller acquisition helper verifies candidate rows, paging and counts and writes private JSON atomically. For optional Python-host monitoring, use `python3 scripts/dcas_monitor.py --config /private/config.json --state /private/state.json --report /private/report.json`. This complete entry point includes metadata stability, Active Lists, minimum/month/year analysis, coverage comparisons, checkpoint migration and report deduplication. It is English-first and silent for an unchanged result or initial baseline; use `--digest` for a full report. See the [full Python guide](references/python-monitor.md) and [fictional config example](references/private-config.example.json). The smaller acquisition helper alone does not perform these monitoring steps. Its optional List No filter currently runs locally using Decimal; the API counts apply before that local filter. For a direct GET with List No in `$where`, use that same predicate for both counts.
 
 Network capability is executor-specific. A failed web-search fetch does not establish that direct HTTP is blocked, and an external CI success does not grant access to a scheduled host. Run `scripts/check_api_network.py` on the actual executor. Offline tests and privacy-safe connectivity smoke tests are not proof of a successful personal query. Keep real identities, filled task profiles, snapshots and results out of public commits, CI logs and artifacts. Never disable TLS checks or hard-code an IP to evade network policy.
 
@@ -107,6 +119,8 @@ Follow [guided onboarding](references/onboarding.md), ask one missing setting at
 
 ## Files
 
+- [Scheduled Tasks guide](references/chatgpt-scheduled.md) and [standalone runtime prompt](references/scheduled-task-prompt.md): default cloud task entry.
+- [scripts/build_scheduled_prompt.py](scripts/build_scheduled_prompt.py): optional private prompt generator.
 - [SKILL.md](SKILL.md): interactive and unattended behavior.
 - [API retrieval](references/api-retrieval.md): requests, completeness and network diagnosis.
 - [Data and reporting](references/data-and-reporting.md): official fields, identity, windows and interpretation.

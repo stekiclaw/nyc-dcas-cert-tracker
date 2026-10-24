@@ -118,3 +118,8 @@ Agent: "请提供你参加考试时登记的英文 First Name 和 Last Name。"
 Then ask about schedule time and notifications, show the configuration summary, and request explicit confirmation. Never repeat an already-known name, exam or agency.
 
 The example is instructional, NOT a real lookup, a real user profile, or a created task.
+
+
+## Scheduled Tasks handoff
+
+Default to the standalone contract in [scheduled-task-prompt.md](scheduled-task-prompt.md) and follow [chatgpt-scheduled.md](chatgpt-scheduled.md). Embed confirmed private settings and an accessible checkpoint reference. Do not make a local Python command the required task entry. When upgrading, reuse saved values and existing task/state identities; do not restart onboarding.
