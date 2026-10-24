@@ -4,6 +4,8 @@
 
 ## 中文
 
+**默认执行语言：英文。** 用户明确指定时可改用其他语言；中英文 README 均保留。
+
 面向 ChatGPT Scheduled Tasks、网页端及其他云端 Agent 的 DCAS 认证追踪 Skill。核心工作流由提示词定义，宿主提供联网、计算、私有快照、定时和通知能力；Python 与 curl 脚本是可选执行工具，不是常驻服务。创建计划任务不代表宿主自动加载本仓库，也不保证跨次状态可用。
 
 ### 功能
@@ -33,7 +35,18 @@
 
 ### 执行工具与网络边界
 
-实际宿主允许 HTTPS 出站时，可用纯 Python 标准库脚本：
+实际宿主允许 HTTPS 出站时，优先使用完整的纯 Python 标准库监控入口：
+
+```bash
+python3 scripts/dcas_monitor.py \
+  --config /private/config.json \
+  --state /private/state.json \
+  --report /private/report.json
+```
+
+从 [虚构配置示例](references/private-config.example.json) 建立私有配置。完整入口包含 Certification + Active List、metadata 稳定性与分页计数校验、全部并列最低序号、月／年历史、批次覆盖比较、通知去重及私有原子快照。默认无变化及首次基线静默；`--digest` 输出英文完整报告。支持旧私有快照显式迁移，避免重置历史。详见 [完整 Python 指南](references/python-monitor.md)。
+
+下面的小脚本仍可用于仅抓取个人 Certification：
 
 ```bash
 python3 scripts/fetch_certifications.py \
@@ -63,6 +76,8 @@ python3 -m unittest discover -s tests -v
 
 ## English
 
+**English is the default execution/report language**, unless the user explicitly requests another language.
+
 A prompt-based NYC DCAS certification Skill for ChatGPT Scheduled Tasks, browser agents and other cloud hosts. The host supplies HTTP access, computation, private checkpoints, scheduling and notifications. Python and curl helpers are optional tools, not a background service. Scheduling does not guarantee that the host loads this repository or retains prior results.
 
 ### Features
@@ -80,7 +95,7 @@ Use encoded `$where`, `$select`, a deterministic `$order`, `$limit=1000` and `$o
 
 Retry transient transport/408/429/5xx failures with limits; inspect official metadata on 400. Record actual DNS/HTTP errors. Do not substitute SODA3, Catalog, search snippets or third-party results. Distinguish row-level event dates, source update times and observation times. A newly selected field is not evidence that its value changed historically.
 
-Use `scripts/fetch_certifications.py` on a private Python host with official-domain HTTPS access, or curl / correctly encoded official URLs where supported. The helper verifies candidate rows, paging and counts and writes private JSON atomically. The host must additionally verify metadata stability, query Active Lists, calculate current/month/year results, and compare certificate coverage and historical checkpoints. Its optional List No filter currently runs locally using Decimal; the API counts apply before that local filter. For a direct GET with List No in `$where`, use that same predicate for both counts.
+Use `scripts/fetch_certifications.py` on a private Python host with official-domain HTTPS access, or curl / correctly encoded official URLs where supported. The smaller acquisition helper verifies candidate rows, paging and counts and writes private JSON atomically. For full monitoring, prefer `python3 scripts/dcas_monitor.py --config /private/config.json --state /private/state.json --report /private/report.json`. This complete entry point includes metadata stability, Active Lists, minimum/month/year analysis, coverage comparisons, checkpoint migration and report deduplication. It is English-first and silent for an unchanged result or initial baseline; use `--digest` for a full report. See the [full Python guide](references/python-monitor.md) and [fictional config example](references/private-config.example.json). The smaller acquisition helper alone does not perform these monitoring steps. Its optional List No filter currently runs locally using Decimal; the API counts apply before that local filter. For a direct GET with List No in `$where`, use that same predicate for both counts.
 
 Network capability is executor-specific. A failed web-search fetch does not establish that direct HTTP is blocked, and an external CI success does not grant access to a scheduled host. Run `scripts/check_api_network.py` on the actual executor. Offline tests and privacy-safe connectivity smoke tests are not proof of a successful personal query. Keep real identities, filled task profiles, snapshots and results out of public commits, CI logs and artifacts. Never disable TLS checks or hard-code an IP to evade network policy.
 
@@ -98,7 +113,9 @@ Follow [guided onboarding](references/onboarding.md), ask one missing setting at
 - [Onboarding](references/onboarding.md): guided setup.
 - [Task templates](references/task-templates.md): standalone private scheduling instructions.
 - [Acceptance scenarios](references/acceptance-scenarios.md): prompt behavior checks.
-- `scripts/`: optional Python, curl and network helpers.
+- [scripts/dcas_monitor.py](scripts/dcas_monitor.py): complete English-first private monitoring CLI.
+- [Python monitor guide](references/python-monitor.md): configuration, migration, evidence and notification boundaries.
+- `scripts/`: smaller acquisition, curl and network helpers remain available.
 - `tests/`: offline helper tests; `agents/openai.yaml`: host metadata.
 
 Official datasets: [Certifications](https://data.cityofnewyork.us/d/a9md-ynri) · [Active Lists](https://data.cityofnewyork.us/d/vx8i-nprf).

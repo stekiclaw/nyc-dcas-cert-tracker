@@ -4,7 +4,7 @@ This is the interactive initialization contract for the prompt-only Skill. The a
 
 ## Conversation rules / 提问规则
 
-- When first invoked for setup, **lead with a focused question**, not a long questionnaire/form. Ask one question per turn, with a short example as needed. Record all fields volunteered in any reply and **never re-ask an answered field**. Support Chinese or English conversation; use official English spellings to match published data.
+- When first invoked for setup, **lead with a focused question**, not a long questionnaire/form. Ask one question per turn, with a short example as needed. Record all fields volunteered in any reply and **never re-ask an answered field**. Default to English unless the user explicitly requests another language; use official English spellings to match published data.
 - If the user says "监控/跟踪/schedule/定期", treat recurring setup as intended. If they ask only "查询/查一下", run a one-off query and do not schedule. When unclear, first ask "想现在查询一次，还是设置定期监控？"
 - **Never** request SSN, DOB, home address, employee ID or other unnecessary sensitive data. Keep real names, precise List No, and task settings out of public repository commits, issues and PRs.
 - Stop prompting entirely in a scheduled/background run. A task reads the private saved settings embedded in **its own instructions**, not a previous conversation, guessed user memory or GitHub.
@@ -12,7 +12,7 @@ This is the interactive initialization contract for the prompt-only Skill. The a
 ## Step-by-step flow / 状态机
 
 ### Step 1 — Choose the scope of **your own** certifications / 选择个人监控范围
-- **Opening question (ask verbatim in Chinese when the user speaks Chinese):** "你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？"
+- **Default English opening question:** "Would you like to track all of your own Civil Service Certifications, or your own certification records associated with a specific agency?" Translate only when the user explicitly requests another language.
 - The choices mean **(a) all certifications belonging to the user** (save `mode: person_all`) and **(b) that same user's certifications related to a specific Agency** (save `mode: person_agency_focus`). The second choice **does not mean all employees/candidates at that agency**. Never offer agency-wide monitoring as the default alternative.
 - If the user chooses their **entire personal record**, ask next: "请提供你参加考试时登记的英文 First Name 和 Last Name。" Optional MI may be included.
 - If the user chooses **their record under a specified Agency**, and has not yet named it, ask next: "你想关注哪个 Agency？请提供名称或常用缩写（例如 OTI、DCWP、SBS）。" After the agency is known, ask for **their** official English first and last name, followed by Exam No as below. If an agency was already named, skip the agency-name question.
@@ -87,6 +87,8 @@ preflight_status: verified        # verified | zero_match_user_confirmed | not_v
 If the user later says "添加考试、改为每天、修改机构、暂停或删除", retrieve the accessible matching task/profile, change **only** the requested fields after confirmation, and retain the remaining saved filters. If the host cannot access an existing task, ask the user for the privately saved task details; do not fabricate task IDs. Keep different exams/candidates isolated in separately named tasks unless the user explicitly wants them combined.
 
 ## Sample guided exchanges / 首次提问与模拟回答（虚构姓名）
+
+The Chinese exchanges below illustrate an explicitly requested Chinese session. English is the default for setup, automatic runs and reports.
 
 **Opening Agent question, same for both examples:**
 Agent: "你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？"

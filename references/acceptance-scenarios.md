@@ -51,7 +51,7 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | O15 | Malformed/missing task profile during unattended run | Fail as configuration error, no broadened query or follow-up interview |
 | O16 | User selects "changes only" but host lacks persistent baseline | Disclose limitation during setup and offer digest/current-snapshot alternative |
 
-| O17 | First-time personal monitoring setup with no other inputs | Opening question must be "你想跟踪自己的 Civil Service Certification，还是自己在某个 Agency 下的认证记录？" |
+| O17 | First-time personal monitoring setup with no other inputs | Opening question must offer all own certifications vs own agency-focused records in English by default (translate on explicit request) |
 | O18 | User selects "自己在 OTI 的 Certification" | Interpret as `person_agency_focus`, not agency-wide monitoring; ask person's name, then Exam No without re-asking Agency |
 | O19 | User selects "全部 Certification" | Interpret as `person_all`; do not ask for an agency unless they later request one |
 | O20 | User selects Agency focus without saying which agency | Ask one question to obtain Agency name, then continue personal identity questions |
@@ -67,3 +67,6 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | D29 | Official exam is 04034 but private input is 4034; List No is 123.500 | Include verified text variants and compare exact decimal identity; do not merge other titles |
 | D30 | Python helper applies List No locally after API count | Distinguish API-scope count from matched identity count; do not falsely claim server filtering |
 | D31 | Helper finishes but metadata/Active/history checks were not performed | Report only verified helper scope; do not label complete monitoring successful |
+
+| D32 | User supplies no output-language preference | Skill and full Python monitor output English by default |
+| D33 | Supported legacy private checkpoint is imported | Preserve dated observations and notification audit records; do not emit a fresh baseline/new-cert alert for unchanged rows |

@@ -128,3 +128,7 @@ The optional Python helper currently performs List No filtering locally using De
 Preserve the original exam text and observed equivalent leading-zero variants in rows. Use numeric Decimal comparison only for numeric fields such as List No and Cert Seq No. When adding newly selected fields, compare common fields to the previous successful snapshot and establish an observation baseline for added fields; do not manufacture a change from previously unobserved values. Keep notified event keys across transport/schema upgrades.
 
 For private monitoring, store full identity filters, selected fields, exact API predicate, paging/count evidence, source update times, observation time, and independently verified agency attribution links. Keep the requesting agency unverified if no official association exists; group by certificate without using promotion-list codes to filter global results.
+
+## Complete monitoring CLI
+
+Use [scripts/dcas_monitor.py](../scripts/dcas_monitor.py) for integrated retrieval, metadata consistency, Active List, current/month/year computations, person-related batch coverage comparisons and private state. See [python-monitor.md](python-monitor.md). The acquisition-only helper boundaries above apply to `fetch_certifications.py`, not the full monitor. All CLI diagnostics/report prose default to English; host translation requires an explicit user preference.
