@@ -85,3 +85,7 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | N04 | Existing monitor upgrades without readable old checkpoint | Preserve reference/history, report comparison unavailable; no baseline reset |
 | N05 | No private writable checkpoint store for changes-only | Explain limitation, ask for an alternative interactively; no silent downgrade |
 | N06 | User explicitly saved Chinese output before English-first upgrade | Retain Chinese override in task metadata |
+
+| N07 | Research source cards are available but JSON URL is unsupported, with no HTTP tool | Return Verification incomplete plus actual tool error; no no-change/missing-record claim or deployment requirement |
+| N08 | Research fetch rejects JSON while same executor has working direct curl | Use direct GET and complete remaining checks; do not generalize research failure to all tools |
+| N09 | Candidate discovery count succeeds but title/List No unresolved | Count is not a verified identity or complete monitor |

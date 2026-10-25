@@ -4,13 +4,17 @@
 
 **无需 GitHub 插件 / No GitHub plugin needed:** [打开完整英文入口并复制提示词 / Open and copy the complete English prompt](START-HERE.md) · [纯文本 / Raw](https://raw.githubusercontent.com/stekiclaw/nyc-dcas-cert-tracker/main/START-HERE.md)
 
-Workflow version: **2026-10-25**.
+Workflow version: **2026-10-25.1**.
 
 ## 中文
 
 **默认执行语言：英文。** 用户明确指定时可改用其他语言；中英文 README 均保留。
 
 面向 ChatGPT Scheduled Tasks、网页端及其他云端 Agent 的 DCAS 认证追踪 Skill。核心工作流由提示词定义，宿主提供联网、计算、私有快照、定时和通知能力；Python 与 curl 脚本是可选执行工具，不是常驻服务。创建计划任务不代表宿主自动加载本仓库，也不保证跨次状态可用。
+
+### 抓取失败时
+
+无 GitHub 插件入口仅消除了仓库依赖，不能增加帐号缺少的 HTTP 工具。能搜索到数据集页面不代表能读取 API JSON。新版先执行小请求预检；若所有可用直接工具都无法读取，只返回 **Verification incomplete**、实际错误及未知范围，保留成功快照，不会写“无变化”或要求部署仓库。详见 [访问诊断](references/transport-troubleshooting.md)。一次请求成功也不等于完整定时任务测试通过。
 
 ### 无插件快速开始
 
@@ -19,7 +23,7 @@ Workflow version: **2026-10-25**.
 3. 单次查询直接执行；需要定时监控时，确认设置后将**完整查询规则和私人条件**存进原任务。没有排程工具时会生成可手动粘贴到 Scheduled 的完整私人指令。
 4. 官方 API 联网及可访问的私人历史快照仍须实际核验。没有历史不能可靠报告新增或排名变化；不会用聊天记忆、公开仓库或搜索摘要代替。
 
-升级已有任务：在私聊粘贴完整入口，要求升级到 **2026-10-25**，保留原任务、排程、个人条件、语言偏好、快照引用和通知记录。仓库更新不会自动修改你的定时任务。不要把填好的私人提示词公开。
+升级已有任务：在私聊粘贴完整入口，要求升级到 **2026-10-25.1**，保留原任务、排程、个人条件、语言偏好、快照引用和通知记录。仓库更新不会自动修改你的定时任务。不要把填好的私人提示词公开。
 
 ### ChatGPT Scheduled Tasks 默认入口
 
@@ -99,6 +103,10 @@ python3 -m unittest discover -s tests -v
 
 A prompt-based NYC DCAS certification Skill for ChatGPT Scheduled Tasks, browser agents and other cloud hosts. The host supplies HTTP access, computation, private checkpoints, scheduling and notifications. Python and curl helpers are optional tools, not a background service. Scheduling does not guarantee that the host loads this repository or retains prior results.
 
+### When retrieval fails
+
+The no-plugin entry removes the repository dependency; it cannot add missing HTTP tools. Finding a dataset page does not prove JSON access. Preflight a small direct request first. If every available direct tool fails, return **Verification incomplete**, the observed error and affected unknown scope, preserving the last checkpoint. Do not report no change or prescribe repository deployment. See [transport diagnosis](references/transport-troubleshooting.md). One successful request is not a complete scheduled end-to-end test.
+
 ### No-plugin quick start
 
 1. Open [START-HERE.md](START-HERE.md) in a regular browser and paste the **entire English code block** into ChatGPT. No GitHub account/plugin, Skill installation or Python is required.
@@ -106,7 +114,7 @@ A prompt-based NYC DCAS certification Skill for ChatGPT Scheduled Tasks, browser
 3. One-off queries run immediately. For monitoring, confirm the setup and save the **complete runtime rules plus private profile** in the task. If scheduling tools are unavailable, receive a fully filled private prompt for manual setup in Scheduled.
 4. Verify direct official API access and private checkpoint availability on the executor. Without accessible history, changes remain unknown; chat memory, search snippets and a public repository are not substitutes.
 
-To upgrade, paste the complete entry in a private chat and request version **2026-10-25**, retaining the existing task, schedule, identity, language override, checkpoint reference and notified events. Repository updates do not update live tasks automatically. Never publish a completed private prompt.
+To upgrade, paste the complete entry in a private chat and request version **2026-10-25.1**, retaining the existing task, schedule, identity, language override, checkpoint reference and notified events. Repository updates do not update live tasks automatically. Never publish a completed private prompt.
 
 ### ChatGPT Scheduled Tasks default entry
 

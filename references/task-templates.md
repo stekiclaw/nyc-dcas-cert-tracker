@@ -1,6 +1,6 @@
 # DCAS scheduled task — standalone host prompt
 
-For users without GitHub integration or Skill installation, use the complete copy-and-paste [START-HERE.md](../START-HERE.md). Do not require repository fetching during setup or execution. Workflow version: 2026-10-25; preserve the existing private task/checkpoint on upgrades.
+For users without GitHub integration or Skill installation, use the complete copy-and-paste [START-HERE.md](../START-HERE.md). Do not require repository fetching during setup or execution. Workflow version: 2026-10-25.1; preserve the existing private task/checkpoint on upgrades.
 
 This is a **self-contained task instruction template** to be completed **privately** after the guided interview in [onboarding.md](onboarding.md). The interactive agent must first ask for missing values, verify identity/filters where possible, summarize settings, and obtain explicit creation confirmation. **Never commit a filled version containing a real person's identity to GitHub.**
 

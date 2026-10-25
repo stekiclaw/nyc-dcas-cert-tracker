@@ -1,6 +1,6 @@
 # Guided onboarding / 引导式初始化
 
-For users without GitHub integration or Skill installation, use the complete copy-and-paste [START-HERE.md](../START-HERE.md). Do not require repository fetching during setup or execution. Workflow version: 2026-10-25; preserve the existing private task/checkpoint on upgrades.
+For users without GitHub integration or Skill installation, use the complete copy-and-paste [START-HERE.md](../START-HERE.md). Do not require repository fetching during setup or execution. Workflow version: 2026-10-25.1; preserve the existing private task/checkpoint on upgrades.
 
 This is the interactive initialization contract for the prompt-only Skill. The agent asks the user for necessary search conditions once, validates them, and saves a **private, fully expanded task prompt** when a supported scheduler confirms creation. The Skill and public GitHub repository are NOT a private user database or a background daemon.
 
