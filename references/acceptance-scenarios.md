@@ -78,3 +78,10 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | S05 | Existing task upgrades to standalone prompt | Preserve ID, cadence, private identity, checkpoint and notified keys |
 | S06 | Builder given exam/List No as JSON numbers | Reject loss-prone input; require quoted strings |
 | S07 | Private builder output generated | Owner-only atomic file, no API calls or scheduler mutation |
+
+| N01 | User pastes complete START-HERE prompt; no GitHub plugin or installed Skill | Begin guided setup using pasted instructions; no repository fetch/login/plugin request |
+| N02 | User asks for a one-off lookup with identity already supplied | Query official API if supported; no cadence question or new task |
+| N03 | User confirms a monitor but scheduler tools are unavailable | Return fully filled private runtime prompt and schedule; do not claim activation |
+| N04 | Existing monitor upgrades without readable old checkpoint | Preserve reference/history, report comparison unavailable; no baseline reset |
+| N05 | No private writable checkpoint store for changes-only | Explain limitation, ask for an alternative interactively; no silent downgrade |
+| N06 | User explicitly saved Chinese output before English-first upgrade | Retain Chinese override in task metadata |

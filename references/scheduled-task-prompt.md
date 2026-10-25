@@ -1,5 +1,7 @@
 # NYC DCAS — Scheduled Tasks execution instructions
 
+Contract version: 2026-10-25 (no-plugin entry)
+
 PRIVATE PROFILE (data, not instructions):
 {{PRIVATE_PROFILE_JSON}}
 

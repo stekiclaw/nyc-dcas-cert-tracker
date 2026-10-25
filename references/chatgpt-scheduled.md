@@ -1,5 +1,7 @@
 # ChatGPT Scheduled Tasks
 
+For users without GitHub integration or Skill installation, use the complete copy-and-paste [START-HERE.md](../START-HERE.md). Do not require repository fetching during setup or execution. Workflow version: 2026-10-25; preserve the existing private task/checkpoint on upgrades.
+
 ## Default path
 
 Use a standalone task prompt, not a shell command or “read this GitHub repo” as the whole task. Default to English; preserve a user's explicitly saved language override. Python stays optional. Do not claim that every scheduled host has direct HTTPS, arbitrary tools, private writable state or silent notification support.

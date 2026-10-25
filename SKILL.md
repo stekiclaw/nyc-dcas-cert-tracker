@@ -5,6 +5,10 @@ description: Prompt-only workflow for official NYC DCAS certification and active
 
 # NYC DCAS Cert Tracker
 
+## No-plugin entry
+
+Use [START-HERE.md](START-HERE.md) for users without GitHub integration or Skill installation. It embeds interactive onboarding and the complete runtime contract in one copyable English prompt. Do not ask users to connect GitHub, fetch repository files or install Python for this route. Use the instructions already pasted into the chat; private configuration and checkpoint access remain necessary. Follow version 2026-10-25 for manual upgrades, preserving existing task/state identity and saved language. A repository change alone never updates a live task.
+
 ## ChatGPT Scheduled Tasks first
 
 Use [scheduled-task-prompt.md](references/scheduled-task-prompt.md) as the **default execution entry** for ChatGPT Scheduled Tasks. Embed a privately completed copy in the task so it runs without cloning GitHub, loading local files or invoking Python. Read [chatgpt-scheduled.md](references/chatgpt-scheduled.md) for setup, capability checks and private checkpoint handling. Retain the existing task and dated checkpoint when upgrading. Python is optional implementation support, never a Scheduled Tasks prerequisite.

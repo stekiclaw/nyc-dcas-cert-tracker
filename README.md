@@ -2,11 +2,24 @@
 
 [中文](#中文) · [English](#english)
 
+**无需 GitHub 插件 / No GitHub plugin needed:** [打开完整英文入口并复制提示词 / Open and copy the complete English prompt](START-HERE.md) · [纯文本 / Raw](https://raw.githubusercontent.com/stekiclaw/nyc-dcas-cert-tracker/main/START-HERE.md)
+
+Workflow version: **2026-10-25**.
+
 ## 中文
 
 **默认执行语言：英文。** 用户明确指定时可改用其他语言；中英文 README 均保留。
 
 面向 ChatGPT Scheduled Tasks、网页端及其他云端 Agent 的 DCAS 认证追踪 Skill。核心工作流由提示词定义，宿主提供联网、计算、私有快照、定时和通知能力；Python 与 curl 脚本是可选执行工具，不是常驻服务。创建计划任务不代表宿主自动加载本仓库，也不保证跨次状态可用。
+
+### 无插件快速开始
+
+1. 用普通浏览器打开 [START-HERE.md](START-HERE.md)，复制代码块内的**全部英文指令**到 ChatGPT 并发送。无需 GitHub 账号、插件、Skill 安装或 Python。
+2. ChatGPT 逐项询问缺失条件，并提供最低序号（含全部并列）、机构重点、月度批次、一年历史和变化监控选项；已有信息不重复询问。
+3. 单次查询直接执行；需要定时监控时，确认设置后将**完整查询规则和私人条件**存进原任务。没有排程工具时会生成可手动粘贴到 Scheduled 的完整私人指令。
+4. 官方 API 联网及可访问的私人历史快照仍须实际核验。没有历史不能可靠报告新增或排名变化；不会用聊天记忆、公开仓库或搜索摘要代替。
+
+升级已有任务：在私聊粘贴完整入口，要求升级到 **2026-10-25**，保留原任务、排程、个人条件、语言偏好、快照引用和通知记录。仓库更新不会自动修改你的定时任务。不要把填好的私人提示词公开。
 
 ### ChatGPT Scheduled Tasks 默认入口
 
@@ -86,6 +99,15 @@ python3 -m unittest discover -s tests -v
 
 A prompt-based NYC DCAS certification Skill for ChatGPT Scheduled Tasks, browser agents and other cloud hosts. The host supplies HTTP access, computation, private checkpoints, scheduling and notifications. Python and curl helpers are optional tools, not a background service. Scheduling does not guarantee that the host loads this repository or retains prior results.
 
+### No-plugin quick start
+
+1. Open [START-HERE.md](START-HERE.md) in a regular browser and paste the **entire English code block** into ChatGPT. No GitHub account/plugin, Skill installation or Python is required.
+2. Answer one missing setup question at a time; choose minima/all ties, agency focus, monthly batches, annual history and/or change monitoring. Already supplied inputs are reused.
+3. One-off queries run immediately. For monitoring, confirm the setup and save the **complete runtime rules plus private profile** in the task. If scheduling tools are unavailable, receive a fully filled private prompt for manual setup in Scheduled.
+4. Verify direct official API access and private checkpoint availability on the executor. Without accessible history, changes remain unknown; chat memory, search snippets and a public repository are not substitutes.
+
+To upgrade, paste the complete entry in a private chat and request version **2026-10-25**, retaining the existing task, schedule, identity, language override, checkpoint reference and notified events. Repository updates do not update live tasks automatically. Never publish a completed private prompt.
+
 ### ChatGPT Scheduled Tasks default entry
 
 Use the [standalone task instructions](references/scheduled-task-prompt.md) with the confirmed private profile and checkpoint reference embedded. Scheduled execution does not require Python, a cloned repository or reloading GitHub. See the [Scheduled Tasks guide](references/chatgpt-scheduled.md). Default to English and preserve explicit saved language preferences. Upgrade an existing task in place and keep its history. Verify actual HTTP, private state and silent-completion capabilities; disclose missing capabilities.
@@ -121,6 +143,7 @@ Follow [guided onboarding](references/onboarding.md), ask one missing setting at
 
 - [Scheduled Tasks guide](references/chatgpt-scheduled.md) and [standalone runtime prompt](references/scheduled-task-prompt.md): default cloud task entry.
 - [scripts/build_scheduled_prompt.py](scripts/build_scheduled_prompt.py): optional private prompt generator.
+- [START-HERE.md](START-HERE.md): complete English copy-and-paste workflow for users without a GitHub plugin.
 - [SKILL.md](SKILL.md): interactive and unattended behavior.
 - [API retrieval](references/api-retrieval.md): requests, completeness and network diagnosis.
 - [Data and reporting](references/data-and-reporting.md): official fields, identity, windows and interpretation.
