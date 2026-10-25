@@ -1,15 +1,10 @@
 interface:
-  display_name: NYC DCAS Cert Tracker
-  short_description: Track DCAS certifications with ChatGPT Scheduled Tasks
-  default_prompt: Use $nyc-dcas-cert-tracker in English to query my DCAS certifications
-    or prepare a standalone ChatGPT Scheduled Task using my saved private scope and
-    checkpoint, without requiring local Python.
-  icon_small: assets/icon.svg
-  icon_large: assets/icon.svg
+  display_name: "NYC DCAS Cert Tracker"
+  short_description: "DCAS tracking in ChatGPT web Scheduled Tasks"
+  default_prompt: "Use $nyc-dcas-cert-tracker in English to query my DCAS certifications or configure a ChatGPT web Scheduled Task, using accessible earlier task results for optional comparisons and no external storage or backend."
+  icon_small: "assets/icon.svg"
+  icon_large: "assets/icon.svg"
 policy:
   products:
-  - chatgpt
-  - codex
-  - api
-  - atlas
+    - "chatgpt"
   allow_implicit_invocation: true
