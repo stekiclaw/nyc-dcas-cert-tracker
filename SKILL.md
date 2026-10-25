@@ -34,6 +34,10 @@ For personal conclusions, obtain First Name, Last Name and exam number; try reso
 
 Use exact normalized official name, MI and List No. For ambiguous identities do not merge results: require user selection at next interaction. Normalize case/whitespace, not fuzzy matches. Scope *both* exam and title code (e.g. CA Operations 4034/04034 with 13621); check reused exam numbers.
 
+## API URL hygiene
+
+Strip `utm_source`, all `utm_*` and other tracking parameters before official API requests; use only documented query parameters and preserve identity filters. Citation URLs are not operational API URLs. Request a clean URL directly and show it as literal code for diagnostics. A400 “Unrecognized arguments [utm_source]” requires correcting the query, not classifying the server/network as unavailable. Do not equate a tool-level DisabledError with an HTTP400.
+
 ## Transport preflight and failure output
 
 Read [transport-troubleshooting.md](references/transport-troubleshooting.md) when a user reports that another account cannot retrieve data. Test a small official JSON request with each actually available supported direct-data tool; research-source cards do not establish API access. An unsupported URL in one tool is not HTTP/DNS evidence or proof about another host. If no direct-data tool succeeds, use the standalone prompt's “Verification incomplete — personal records not retrieved” failure format. Never headline failed retrieval as “no confirmed personal-record change” or require repository deployment as the remedy. Keep affected comparisons unknown and preserve previous state.

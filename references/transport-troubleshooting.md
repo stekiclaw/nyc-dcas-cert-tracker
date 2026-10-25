@@ -12,3 +12,7 @@ On a private terminal, shell quoting must preserve the literal dollar signs in `
 When acquisition fails, report: “Verification incomplete — personal records not retrieved,” component, actual attempted URL, tool/status or observed error, executed/incomplete/not-executed scope, comparison unknown and checkpoint preservation. Never say “no confirmed change” or “no match” as the result of a failed query. Do not require GitHub or repository deployment. A dataset update time read from a source page is not evidence that candidate rows were queried.
 
 The same official URL may succeed through curl and fail through a research fetch tool. Success here does not prove another user's account can reach it. A prompt-only workflow is supported only where the executor actually exposes direct official API retrieval and the required private state. An alternative privately run script is optional, not a hidden deployment prerequisite.
+
+## Unsupported tracking parameters
+
+Direct curl comparison on 2026-10-25: the official Certification endpoint with only `$select=count(*) as total` returned HTTP200 and a JSON array. The same GET plus `utm_source=chatgpt.com` returned HTTP400 with `Unrecognized arguments [utm_source]`. This confirms a query failure mechanism, not that every ChatGPT tool adds UTM or that a reported DisabledError has the same cause. Strip tracking keys before tool execution, preserving all identity filters. Do not rely on a rendered citation URL. Retest the actual scheduled executor with the clean request; it may still lack direct API support.

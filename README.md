@@ -12,6 +12,10 @@ Workflow version: **2026-10-25.1**.
 
 面向 ChatGPT Scheduled Tasks、网页端及其他云端 Agent 的 DCAS 认证追踪 Skill。核心工作流由提示词定义，宿主提供联网、计算、私有快照、定时和通知能力；Python 与 curl 脚本是可选执行工具，不是常驻服务。创建计划任务不代表宿主自动加载本仓库，也不保证跨次状态可用。
 
+### API 链接不能附带追踪参数
+
+请求前必须移除 `utm_source` / `utm_*` 等追踪参数。2026-10-25 直接对比确认：相同 Certification 查询不带 UTM 返回 HTTP200，附加 `utm_source=chatgpt.com` 返回 HTTP400（`Unrecognized arguments [utm_source]`）。实际请求使用干净 URL，不能直接复用可能被装饰的引用链接。`DisabledError` 仍需单独核验，不能一概归因于 UTM。
+
 ### 抓取失败时
 
 无 GitHub 插件入口仅消除了仓库依赖，不能增加帐号缺少的 HTTP 工具。能搜索到数据集页面不代表能读取 API JSON。新版先执行小请求预检；若所有可用直接工具都无法读取，只返回 **Verification incomplete**、实际错误及未知范围，保留成功快照，不会写“无变化”或要求部署仓库。详见 [访问诊断](references/transport-troubleshooting.md)。一次请求成功也不等于完整定时任务测试通过。
@@ -102,6 +106,10 @@ python3 -m unittest discover -s tests -v
 **English is the default execution/report language**, unless the user explicitly requests another language.
 
 A prompt-based NYC DCAS certification Skill for ChatGPT Scheduled Tasks, browser agents and other cloud hosts. The host supplies HTTP access, computation, private checkpoints, scheduling and notifications. Python and curl helpers are optional tools, not a background service. Scheduling does not guarantee that the host loads this repository or retains prior results.
+
+### Keep tracking parameters out of API requests
+
+Strip `utm_source` / all `utm_*` and other tracking keys before issuing API GETs. A direct comparison on 2026-10-25 returned HTTP200 for the clean Certification query and HTTP400 (`Unrecognized arguments [utm_source]`) for the same query plus `utm_source=chatgpt.com`. Use clean operational URLs rather than decorated citation links. A tool-level `DisabledError` remains a separate condition to verify.
 
 ### When retrieval fails
 

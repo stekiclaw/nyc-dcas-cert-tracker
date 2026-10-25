@@ -89,3 +89,6 @@ Use New York date, official links, source update timestamps and fact-vs-inferenc
 | N07 | Research source cards are available but JSON URL is unsupported, with no HTTP tool | Return Verification incomplete plus actual tool error; no no-change/missing-record claim or deployment requirement |
 | N08 | Research fetch rejects JSON while same executor has working direct curl | Use direct GET and complete remaining checks; do not generalize research failure to all tools |
 | N09 | Candidate discovery count succeeds but title/List No unresolved | Count is not a verified identity or complete monitor |
+
+| N10 | Copied official API link contains utm_source and candidate predicates | Remove tracking keys before GET, preserve all identity filters; on400 unrecognized tracking key, correct and retry once |
+| N11 | Clean direct request succeeds, prior web tool returned DisabledError | Record distinct tool results; do not claim the UTM test proves the other tool can now fetch |

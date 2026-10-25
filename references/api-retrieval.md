@@ -132,3 +132,7 @@ For private monitoring, store full identity filters, selected fields, exact API 
 ## Complete monitoring CLI
 
 Use [scripts/dcas_monitor.py](../scripts/dcas_monitor.py) for integrated retrieval, metadata consistency, Active List, current/month/year computations, person-related batch coverage comparisons and private state. See [python-monitor.md](python-monitor.md). The acquisition-only helper boundaries above apply to `fetch_certifications.py`, not the full monitor. All CLI diagnostics/report prose default to English; host translation requires an explicit user preference.
+
+## Clean API request URLs
+
+Construct requests from the fixed API base plus documented SoQL parameters. Remove `utm_source`, all `utm_*`, `fbclid`, `gclid` and citation/link tracking keys; preserve candidate/exam/title filters. The Certification API rejects `utm_source` with400 “Unrecognized arguments [utm_source]” (direct comparison verified 2026-10-25). Correct and retry once. Present operational diagnostic URLs as literal code; citation links may be decorated independently of an actual request. DisabledError without an HTTP status is a distinct tool failure and must be retested with a clean URL.
