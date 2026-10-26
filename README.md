@@ -4,7 +4,7 @@
 
 **[开始使用 / Copy the full English prompt](START-HERE.md)**
 
-Version **2026-10-26.1** · Default output: **English**
+Version **2026-10-26.2** · Default output: **English**
 
 ## 中文
 
@@ -13,9 +13,13 @@ Version **2026-10-26.1** · Default output: **English**
 ### 使用
 
 1. 打开 [START-HERE.md](START-HERE.md)，复制代码块内全部英文提示词到 ChatGPT。
-2. 回答缺失条件并选择功能；已有姓名、考试、机构等不重复询问。个人数据只填在自己的私人对话／任务中。
+2. 仅粘贴入口时默认先提问进入配置引导，不会把未配置当成查询失败。回答缺失条件并选择功能；已有姓名、考试、机构等不重复询问。个人数据只填在自己的私人对话／任务中。
 3. 先直接验证官方 API、身份及完整查询。成功后，确认排程和输出方式，由可用工具创建计划任务；没有排程工具时使用生成的完整私人指令手动建立任务。
 4. 支持时优先在同一聊天中排程，并检查第一次实际定时运行。普通聊天成功不保证定时运行工具相同。
+
+### 首次配置与诊断分开
+
+只粘贴提示词时，先询问监控范围，再逐项收集缺失信息。只有明确要求“只诊断访问”才直接测试接口；真正的定时执行才使用“不提问”规则。测试帐号若没有浏览器导航工具，仍无法使用本会话已验证的浏览器路径，模式修正不会增加工具权限。
 
 ### 能力预检与发布状态
 
@@ -55,9 +59,13 @@ Run official NYC DCAS personal certification and Active List checks in the user'
 
 ### Start
 
-1. Open [START-HERE.md](START-HERE.md), paste the entire English code block into ChatGPT and supply only missing private settings.
+1. Open [START-HERE.md](START-HERE.md), paste the entire English code block into ChatGPT and supply only missing private settings. Pasting it alone starts guided setup; missing identity is not a failed lookup or an automatic diagnostic request.
 2. Choose minimum/all ties, agency focus, monthly batches, one-year visible history and/or qualified changes. Verify direct official data and identity first.
 3. After a successful preflight, confirm schedule and policy. Use available scheduling tools or manually paste the fully configured private runtime instructions into Scheduled. Prefer the same chat where supported; verify the first actual scheduled run.
+
+### Setup versus diagnostics
+
+Pasting the workflow alone starts interactive onboarding, one missing question at a time. Only an explicit request starts diagnostics. Reusable “unattended” wording cannot change a normal chat into a scheduled run. The actual scheduled context retains no-question configuration errors. Correct routing does not add a browser tool to an account that lacks one.
 
 ### Capability checks and release status
 

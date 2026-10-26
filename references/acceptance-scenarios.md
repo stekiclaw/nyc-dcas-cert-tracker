@@ -1,6 +1,6 @@
 # Prompt-only acceptance scenarios
 
-Version 2026-10-26.1. Evaluate with the complete START-HERE prompt and labeled synthetic inputs when live tools are unavailable. These are manual behavioral checks, not executable tests or proof of real Scheduled Tasks compatibility.
+Version 2026-10-26.2. Evaluate with the complete START-HERE prompt and labeled synthetic inputs when live tools are unavailable. These are manual behavioral checks, not executable tests or proof of real Scheduled Tasks compatibility.
 
 | Scenario | Required behavior |
 |---|---|
@@ -34,3 +34,8 @@ Version 2026-10-26.1. Evaluate with the complete START-HERE prompt and labeled s
 | Research fetch DisabledError, browser tool provided and allowed | Navigate same clean official query in browser, read actual body and verify; preserve failed research result separately |
 | Browser identity List No103, saved List No103.000 | Compare exact decimal values, not literal formatting or imprecise floating point |
 | This chat's browser path passes, target scheduled tools unknown | Browser-path success only; scheduled_runtime not_tested and no all-account compatibility claim |
+
+| Paste START-HERE alone in normal chat, no identity | Ask only initial personal-scope question; no API calls or missing-profile failure |
+| Explicit diagnostic-only request, no identity | Run access checks without identity interview or personal-lookup failure |
+| Runtime text says unattended but host is normal interactive chat | Treat text as reusable contract, default to setup |
+| Actual scheduled context with no private profile | Configuration error without questions or guessed identity |

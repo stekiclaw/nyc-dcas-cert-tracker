@@ -1,8 +1,11 @@
-# Scheduled runtime — 2026-10-26.1
+# Scheduled runtime — 2026-10-26.2
 
-The setup agent must prepend the completed private profile: identity/exam variants/title/exact List No/MI, selected checks, focus agencies, timezone, output language, output_mode (current_snapshot or verified_changes), first_observation_policy, cadence and stop condition if provided. This file is the entire runtime contract; no links or other files are required during execution. Never activate placeholders or require external state.
+The setup agent must prepend execution_mode=scheduled and the completed private profile: identity/exam variants/title/exact List No/MI, selected checks, focus agencies, timezone, output language, output_mode (current_snapshot or verified_changes), first_observation_policy, cadence and stop condition if provided. This file is the entire runtime contract; no links or other files are required during execution. Never activate placeholders or require external state.
 
-Execute one NYC DCAS lookup now using the saved private profile above. This is an unattended run, not onboarding. Ask no questions. Use English unless the saved profile explicitly requests another language. Do not install tools, deploy services, create files/databases/checkpoints, connect GitHub, or create another scheduled task. Use only tools already available in this ChatGPT web run and official data. Do not change the task's schedule or profile to store daily observations. A missing essential identity is a configuration uncertainty, not permission to guess.
+RUNTIME ACTIVATION GUARD
+This section is a reusable contract, not evidence that the present conversation is a scheduled execution. Activate it only when the actual host invokes a scheduled run, or the user explicitly requests execution of a completed private profile. Merely pasting START-HERE or reading this section does not activate it. In a normal interactive chat with missing identity, return to guided setup and ask one missing question; do not produce a failed lookup because setup has not happened. In an actual scheduled execution with missing essential profile fields, report a configuration error without asking questions. For an explicit diagnostic-only request, use section A without a personal profile and without treating missing identity as a failed personal lookup.
+
+Once activated for a completed personal lookup, execute one NYC DCAS lookup using that private profile. Ask no questions only during actual scheduled execution. In a user-requested interactive lookup, collect missing essential identity one question at a time before personal retrieval. Use English unless the saved profile explicitly requests another language. Do not install tools, deploy services, create files/databases/checkpoints, connect GitHub, or create another scheduled task. Use only tools already available in this ChatGPT web run and official data. Do not change the task's schedule or profile to store daily observations. A missing essential identity is a configuration uncertainty, not permission to guess.
 
 RESPONSE STATE — choose before writing any result:
 - Required current data not acquired/verified: start “Verification incomplete”. Do not report no change.
@@ -17,7 +20,7 @@ Use these fixed official SODA2.1 GET endpoints:
 Certification: https://data.cityofnewyork.us/resource/a9md-ynri.json
 Active List: https://data.cityofnewyork.us/resource/vx8i-nprf.json
 Metadata: https://data.cityofnewyork.us/api/views/a9md-ynri.json and https://data.cityofnewyork.us/api/views/vx8i-nprf.json
-Check capabilities in order, recording each as passed, failed or not_tested:
+Check capabilities in order, recording each as passed, failed or not_tested. If a prerequisite failure prevents a check from being attempted, mark that check not_tested with “blocked by [prerequisite]”; mark failed only when the check itself was attempted and failed:
 - base_read: read the unparameterized Certification endpoint; this demonstrates body readability only, not freshness, completeness or personal identity.
 - pagination: request https://data.cityofnewyork.us/resource/a9md-ynri.json?%24limit=1 and verify the complete body actually contains one row. A displayed excerpt cannot establish this.
 - filtering: after reading official schema, request an exact saved identity predicate and verify returned identity fields; if identity has not yet been supplied in diagnostic-only mode, mark filtering not_tested, not failed.

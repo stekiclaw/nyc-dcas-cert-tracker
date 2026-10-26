@@ -5,7 +5,11 @@ description: Prompt-only NYC DCAS personal certification and active-list queries
 
 # NYC DCAS Cert Tracker
 
-Version 2026-10-26.1. Execute with ChatGPT web tools only. Do not require GitHub integration, installed scripts, files, databases, private checkpoint services or external compute. ChatGPT's ordinary saved task instructions and outputs are the only possible history source; no guarantee that earlier outputs are accessible.
+Version 2026-10-26.2. Execute with ChatGPT web tools only. Do not require GitHub integration, installed scripts, files, databases, private checkpoint services or external compute. ChatGPT's ordinary saved task instructions and outputs are the only possible history source; no guarantee that earlier outputs are accessible.
+
+## Mode routing
+
+Pasting the workflow alone in a normal chat defaults to guided interactive setup. Ask the first missing scope question and wait; do not run diagnostics or report missing saved identity. Diagnostics require an explicit request outside reusable instructions. Unattended mode requires actual host run context or an explicit request to execute a completed private profile; a sentence in the runtime template is not proof of the current mode. The no-question rule applies to actual scheduled runs only. Preserve actual scheduled missing-profile errors without onboarding. Save execution_mode=scheduled in configured task instructions.
 
 ## Entry and setup
 
