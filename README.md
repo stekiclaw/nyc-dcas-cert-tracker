@@ -4,7 +4,7 @@
 
 **[开始使用 / Copy the full English prompt](START-HERE.md)**
 
-Version **2026-10-25.2** · Default output: **English**
+Version **2026-10-26.1** · Default output: **English**
 
 ## 中文
 
@@ -21,7 +21,9 @@ Version **2026-10-25.2** · Default output: **English**
 
 逐项报告 `base_read`（基础正文）、`pagination`（分页）、`filtering`（身份筛选）、`completeness`（完整性）、`prior_result_access`（历史结果）、`scheduled_runtime`（真实定时执行），状态为 passed／failed／not_tested。基础读取成功不代表个人查询可用。可单独要求“只诊断访问”，无需先提供姓名，也不会自动创建任务。
 
-**当前已知限制：** 测试帐号的无参数接口成功，带筛选／分页参数的网页请求返回 DisabledError；尚无该帐号完整定时运行成功的证据。本版发布的是提示词流程，未宣称解决该访问问题。流程和文档检查通过，与目标帐号实际运行成功分别报告。
+**2026-10-26 新增可用路径：** 本会话的研究工具无法读取带参数请求，但内置浏览器直接导航同一官方 API 成功。已通过 Certification 精确身份筛选、四页完整读取（33 条）、首尾计数及 metadata 稳定性检查，Active List 也完成独立核验（1 条）。查询仅在本次浏览器内完成，未部署服务或保存外部快照。这里的条数是访问测试证据，不是排名变化通知。
+
+因此流程先检查可用工具：研究抓取失败且本次运行已提供浏览器导航工具时，使用浏览器读取官方 JSON，再执行相同完整性检查。不能用提示词给帐号启用缺少的浏览器能力。**测试帐号与真实计划任务的浏览器能力仍未验证**；本会话成功不等于所有帐号均可用，流程检查与目标帐号实际成功分开报告。
 
 ### 功能和输出方式
 
@@ -33,7 +35,7 @@ Version **2026-10-25.2** · Default output: **English**
 
 ### 必须知道的限制
 
-**本项目不能给帐号增加联网工具。** 若干净的官方 JSON 请求仍返回 `DisabledError`，且没有其他可用直接工具，该帐号当前无法运行本流程。搜索到数据集页面不代表查到了个人记录；失败不得写无变化。不要反复改提示词声称已修复权限。
+**本项目不能给帐号增加联网工具。** 若研究抓取返回 `DisabledError`，且没有已提供且可用的浏览器或其他直接工具，该帐号当前无法运行本流程。搜索到数据集页面不代表查到了个人记录；失败不得写无变化。不要反复改提示词声称已修复权限。
 
 **不使用外部持久存储，因此不保证完整历史、去重或可靠变化提醒。** 任务只能比较本次实际可读取的此前 ChatGPT 运行结果。名单当前可见的一年历史，不等于持续保存一年的个人排名快照。首次观察不是新增事件；无法访问历史不是无变化。不要求用户部署后端来补足这些限制。
 
@@ -61,7 +63,9 @@ Run official NYC DCAS personal certification and Active List checks in the user'
 
 Report base_read, pagination, filtering, completeness, prior_result_access and scheduled_runtime separately as passed/failed/not_tested. Basic body access does not prove personal lookup readiness. Ask “diagnose access only” to test without an identity interview or task creation. Interactive success leaves scheduled_runtime not_tested.
 
-**Known limitation:** the tested account could read the unparameterized endpoint, while filtered/paginated web requests returned DisabledError. Complete scheduled execution on that account remains unverified. This is a prompt-workflow release, not a claim that access restrictions have been fixed. Report document/behavior validation separately from live account compatibility.
+**Browser path verified on 2026-10-26:** research fetches failed, but this session's built-in browser successfully navigated the official parameterized APIs. Certification exact identity filtering, four-page retrieval (33 rows), before/after counts and stable metadata passed; Active List was independently verified (1 row). No deployed backend or external checkpoint was used for these browser tests. Counts are access-test evidence, not candidate change alerts.
+
+When an available permitted browser-navigation tool exists, try the same clean official request there and verify the complete rendered JSON. Do not treat research-fetch failure as proof that all tools fail. A prompt cannot enable a missing browser. **The test account and real scheduled runtime remain unverified**; this session's success does not establish all-account compatibility. Report per-tool results and actual scheduled success separately.
 
 ### Two policies
 

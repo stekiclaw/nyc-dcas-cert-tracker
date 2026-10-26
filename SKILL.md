@@ -5,7 +5,7 @@ description: Prompt-only NYC DCAS personal certification and active-list queries
 
 # NYC DCAS Cert Tracker
 
-Version 2026-10-25.2. Execute with ChatGPT web tools only. Do not require GitHub integration, installed scripts, files, databases, private checkpoint services or external compute. ChatGPT's ordinary saved task instructions and outputs are the only possible history source; no guarantee that earlier outputs are accessible.
+Version 2026-10-26.1. Execute with ChatGPT web tools only. Do not require GitHub integration, installed scripts, files, databases, private checkpoint services or external compute. ChatGPT's ordinary saved task instructions and outputs are the only possible history source; no guarantee that earlier outputs are accessible.
 
 ## Entry and setup
 
@@ -13,7 +13,7 @@ For users without an installed Skill, provide [START-HERE.md](START-HERE.md): on
 
 Follow its setup interactively, asking one missing question at a time and reusing supplied values. Offer all own certs versus agency-focused personal certs; current minimum/all ties, month, one-year visible records and optional changes. Default English unless explicitly overridden. Never start onboarding in scheduled runs. Use [data-and-reporting.md](references/data-and-reporting.md) for official sources and interpretation.
 
-Preflight base_read, pagination, filtering and completeness separately before calling the workflow usable. Record passed/failed/not_tested. Test prior_result_access for change claims; scheduled_runtime remains not_tested until an actual scheduled execution succeeds. For explicit diagnostic-only requests, run these checks without identity onboarding or task creation. Do not replace an unsuccessful monitor with an unrequested diagnostic schedule. Default the proposed output mode to current_snapshot unless the user selected otherwise. A source page or count probe alone is not a successful personal lookup. DisabledError without HTTP status is a tool-level failure. Strip UTM/tracking keys from operational requests and preserve identity predicates. A prompt cannot add blocked/missing tools.
+Preflight base_read, pagination, filtering and completeness separately before calling the workflow usable. Record passed/failed/not_tested. Test prior_result_access for change claims; scheduled_runtime remains not_tested until an actual scheduled execution succeeds. For explicit diagnostic-only requests, run these checks without identity onboarding or task creation. Do not replace an unsuccessful monitor with an unrequested diagnostic schedule. Default the proposed output mode to current_snapshot unless the user selected otherwise. A source page or count probe alone is not a successful personal lookup. DisabledError without HTTP status is a tool-level failure. Strip UTM/tracking keys from operational requests and preserve identity predicates. A prompt cannot add blocked/missing tools. Distinguish research_fetch from browser_navigation. When a research fetch fails and an available permitted browser tool supports public-site navigation, open the same official query in a browser tab, read the rendered JSON body, and verify filtering/counts/paging/metadata on that path. Do not request login, external infrastructure or a plugin. Only classify the lookup unavailable after checking actually provided permitted paths; never generalize one tool's DisabledError to all tools or accounts.
 
 ## Scheduled execution
 

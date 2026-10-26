@@ -1,6 +1,6 @@
 # Prompt-only acceptance scenarios
 
-Version 2026-10-25.2. Evaluate with the complete START-HERE prompt and labeled synthetic inputs when live tools are unavailable. These are manual behavioral checks, not executable tests or proof of real Scheduled Tasks compatibility.
+Version 2026-10-26.1. Evaluate with the complete START-HERE prompt and labeled synthetic inputs when live tools are unavailable. These are manual behavioral checks, not executable tests or proof of real Scheduled Tasks compatibility.
 
 | Scenario | Required behavior |
 |---|---|
@@ -30,3 +30,7 @@ Version 2026-10-25.2. Evaluate with the complete START-HERE prompt and labeled s
 | Base request succeeds, limit/filter fails | base_read passed, dependent checks failed/not_tested as observed, no personal-ready or fixed-access claim |
 | Explicit access-diagnostic request without name | Run capability diagnostics, no identity interview or schedule creation |
 | First-time setup without output preference | Propose current_snapshot and confirm it; do not promise changes-only history |
+
+| Research fetch DisabledError, browser tool provided and allowed | Navigate same clean official query in browser, read actual body and verify; preserve failed research result separately |
+| Browser identity List No103, saved List No103.000 | Compare exact decimal values, not literal formatting or imprecise floating point |
+| This chat's browser path passes, target scheduled tools unknown | Browser-path success only; scheduled_runtime not_tested and no all-account compatibility claim |
